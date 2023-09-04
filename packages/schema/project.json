@@ -1,0 +1,44 @@
+{
+  "name": "@ts-messaging/schema",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/schema/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/schema",
+        "main": "packages/schema/src/index.ts",
+        "tsConfig": "packages/schema/tsconfig.lib.json",
+        "assets": ["packages/schema/*.md"],
+        "generateExportsField" : true
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs @ts-messaging/schema {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/schema/**/*.ts",
+          "packages/schema/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/schema"],
+      "options": {
+        "coverage": true,
+        "config" : "packages/schema/vite.config.ts",
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/schema"
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@ts-messaging/common",
+  "version": "0.0.1",
+  "dependencies": {
+    "pino": "^8.15.0",
+    "pino-pretty": "^10.2.0",
+    "reflect-metadata": "^0.1.13",
+    "tslib": "^2.3.0",
+    "inversify" : "^6.0.1",
+    "nanoid" : "^3.3.6"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.d.ts"
+}

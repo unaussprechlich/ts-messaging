@@ -1,0 +1,44 @@
+{
+  "name": "@ts-messaging/schema-avro",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/schema-avro/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/schema-avro",
+        "main": "packages/schema-avro/src/index.ts",
+        "tsConfig": "packages/schema-avro/tsconfig.lib.json",
+        "assets": ["packages/schema-avro/*.md"],
+        "generateExportsField" : true
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs @ts-messaging/schema-avro {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/schema-avro/**/*.ts",
+          "packages/schema-avro/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/schema-avro"],
+      "options": {
+        "coverage": true,
+        "config" : "packages/schema-avro/vite.config.ts",
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/schema-avro"
+      }
+    }
+  },
+  "tags": []
+}
