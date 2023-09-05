@@ -9,7 +9,7 @@
     "changeset::add" : "pnpm changeset add",
     "changeset::version" : "pnpm changeset version",
     "changeset::version-snapshot" : "pnpm changeset version --snapshot snapshot",
-    "publish::all" : "pnpm publish --json --recursivey --access public",
+    "publish::all" : "pnpm publish --json --recursive --access public",
     "publish::all--dry-run" : "pnpm publish --json --recursive --dry-run"
   },
   "private": true,
