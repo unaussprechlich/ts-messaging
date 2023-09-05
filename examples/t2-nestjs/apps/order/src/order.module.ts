@@ -1,9 +1,9 @@
 import { Module, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { MessagingController } from '../../inventory/src/messaging.controller';
 import { Kafka } from '@ts-messaging/client-kafka';
 import { Confluent } from '@ts-messaging/registry-confluent';
 import { Avro } from '@ts-messaging/schema-avro';
+import { OrderMessagingController } from './order.messaging.controller';
 
 @Module({
   providers: [OrderService],
@@ -13,12 +13,13 @@ export class OrderModule implements OnModuleInit, OnModuleDestroy {
     broker: { brokers: ['localhost:9092'] },
     consumer: { groupId: 'order' },
     registry: new Confluent({
+      autoRegisterSchemas: true,
       clientConfig: {
         baseUrl: 'http://localhost:8081',
       },
       schemaProviders: [new Avro()],
     }),
-    controllers: [MessagingController],
+    controllers: [OrderMessagingController],
   });
 
   async onModuleInit() {

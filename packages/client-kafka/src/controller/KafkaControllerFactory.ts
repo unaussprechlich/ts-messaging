@@ -1,11 +1,6 @@
 import { KafkaConsumer } from '../client';
 import { KafkaController, KafkaMessageEndpoint } from './KafkaController';
-import {
-  Constructor,
-  LoggerChild,
-  Logger,
-  ContainerDI,
-} from '@ts-messaging/common';
+import { Constructor, LoggerChild, Logger } from '@ts-messaging/common';
 import { AbstractControllerFactory } from '@ts-messaging/client';
 import {
   KafkaControllerReflections,
@@ -23,10 +18,7 @@ export class KafkaControllerFactory extends AbstractControllerFactory {
     uuid: this.__uid,
   });
 
-  constructor(
-    protected readonly kafka: Kafka,
-    protected readonly container: ContainerDI
-  ) {
+  constructor(protected readonly kafka: Kafka) {
     super();
   }
 

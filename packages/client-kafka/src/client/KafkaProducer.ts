@@ -6,9 +6,8 @@ import type {
   RecordMetadata,
 } from 'kafkajs';
 import { AbstractProducer } from '@ts-messaging/client';
-import { Injectable, Logger, LoggerChild } from '@ts-messaging/common';
+import { Logger, LoggerChild } from '@ts-messaging/common';
 
-@Injectable()
 export class KafkaProducer extends AbstractProducer {
   protected readonly logger: Logger = LoggerChild({
     package: 'client-kafka',

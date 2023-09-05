@@ -4,7 +4,7 @@ import { Confluent } from '@ts-messaging/registry-confluent';
 import { Avro } from '@ts-messaging/schema-avro';
 import { InventoryController } from './inventory.controller';
 import { InventoryService } from './inventory.service';
-import { MessagingController } from './messaging.controller';
+import { InventoryMessagingController } from './inventory.messaging.controller';
 
 @Module({
   controllers: [InventoryController],
@@ -15,12 +15,13 @@ export class InventoryModule implements OnModuleInit, OnModuleDestroy {
     broker: { brokers: ['localhost:9092'] },
     consumer: { groupId: 'inventory' },
     registry: new Confluent({
+      autoRegisterSchemas: true,
       clientConfig: {
         baseUrl: 'http://localhost:8081',
       },
       schemaProviders: [new Avro()],
     }),
-    controllers: [MessagingController],
+    controllers: [InventoryMessagingController],
   });
 
   async onModuleInit() {

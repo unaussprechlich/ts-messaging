@@ -5,7 +5,7 @@ import { InventoryService } from './inventory.service';
 import { InventorySagaMessage } from './schemas/InventorySagaMessage';
 
 @Kafka.Controller()
-export class MessagingController {
+export class InventoryMessagingController {
   @Kafka.InjectClient()
   readonly client: Kafka;
 

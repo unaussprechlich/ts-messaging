@@ -1,10 +1,9 @@
 import { Consumer as KafkaJsConsumer } from 'kafkajs';
 import { KafkaMessage } from '../KafkaMessage';
 import { KafkaTopic } from '../topic';
-import { Injectable, Logger, LoggerChild } from '@ts-messaging/common';
+import { Logger, LoggerChild } from '@ts-messaging/common';
 import { AbstractConsumer } from '@ts-messaging/client';
 
-@Injectable()
 export class KafkaConsumer extends AbstractConsumer {
   private topicsRegistry: Map<string, KafkaTopic> = new Map();
 

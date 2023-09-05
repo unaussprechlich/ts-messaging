@@ -18,24 +18,6 @@
         "tsConfigPath": "apps/order/tsconfig.app.json"
       }
     },
-    "repository": {
-      "type": "library",
-      "root": "libs/repository",
-      "entryFile": "index",
-      "sourceRoot": "libs/repository/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/repository/tsconfig.lib.json"
-      }
-    },
-    "saga": {
-      "type": "library",
-      "root": "libs/saga",
-      "entryFile": "index",
-      "sourceRoot": "libs/saga/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/saga/tsconfig.lib.json"
-      }
-    },
     "inventory": {
       "type": "application",
       "root": "apps/inventory",
@@ -61,6 +43,24 @@
       "sourceRoot": "apps/orchestrator/src",
       "compilerOptions": {
         "tsConfigPath": "apps/orchestrator/tsconfig.app.json"
+      }
+    },
+    "repository": {
+      "type": "library",
+      "root": "libs/repository",
+      "entryFile": "index",
+      "sourceRoot": "libs/repository/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/repository/tsconfig.lib.json"
+      }
+    },
+    "saga": {
+      "type": "library",
+      "root": "libs/saga",
+      "entryFile": "index",
+      "sourceRoot": "libs/saga/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/saga/tsconfig.lib.json"
       }
     }
   }

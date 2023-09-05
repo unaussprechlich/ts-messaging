@@ -33,14 +33,18 @@ export abstract class KafkaClient
     uuid: this.__uid,
   });
 
+  autoRegisterTopics: boolean;
+
   protected constructor(config: {
     broker: KafkaConfig;
     producer?: ProducerConfig;
     consumer: ConsumerConfig;
     admin?: AdminConfig;
+    autoRegisterTopics?: boolean;
   }) {
     super();
     this.kafka = new KafkaJs(config.broker);
+    this.autoRegisterTopics = config.autoRegisterTopics ?? false;
 
     this.consumer = this.createConsumer(config.consumer);
     this.producer = this.createProducer(config.producer ?? {});

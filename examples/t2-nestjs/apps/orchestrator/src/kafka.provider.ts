@@ -1,8 +1,8 @@
 import { Kafka } from '@ts-messaging/client-kafka';
-import { MessagingController } from '../../inventory/src/messaging.controller';
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Confluent } from '@ts-messaging/registry-confluent';
 import { Avro } from '@ts-messaging/schema-avro';
+import { OrchestratorMessagingController } from './orchestrator.messaging.controller';
 
 @Injectable()
 export class KafkaProvider implements OnModuleInit, OnModuleDestroy {
@@ -10,12 +10,13 @@ export class KafkaProvider implements OnModuleInit, OnModuleDestroy {
     broker: { brokers: ['localhost:9092'] },
     consumer: { groupId: 'orchestrator' },
     registry: new Confluent({
+      autoRegisterSchemas: true,
       clientConfig: {
         baseUrl: 'http://localhost:8081',
       },
       schemaProviders: [new Avro()],
     }),
-    controllers: [MessagingController],
+    controllers: [OrchestratorMessagingController],
   });
 
   async onModuleInit() {

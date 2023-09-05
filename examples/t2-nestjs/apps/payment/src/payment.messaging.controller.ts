@@ -5,7 +5,7 @@ import { PaymentService } from './payment.service';
 import { PaymentSagaMessage } from './schemas/PaymentSagaMessage';
 
 @Kafka.Controller()
-export class MessagingController {
+export class PaymentMessagingController {
   @Kafka.InjectClient()
   readonly client: Kafka;
 

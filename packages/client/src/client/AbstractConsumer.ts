@@ -1,12 +1,5 @@
-import {
-  BaseClass,
-  Consumer,
-  Controller,
-  Injectable,
-  Topic,
-} from '@ts-messaging/common';
+import { BaseClass, Consumer, Controller, Topic } from '@ts-messaging/common';
 
-@Injectable()
 export abstract class AbstractConsumer extends BaseClass implements Consumer {
   protected readonly controllers: Controller[] = [];
 

@@ -9,9 +9,8 @@ import {
   RecordSchemaDecoratorFactory,
   StringSchemaDecoratorFactory,
 } from './decorators';
-import { Injectable, SchemaEntrypoint } from '@ts-messaging/common';
+import { SchemaEntrypoint } from '@ts-messaging/common';
 
-@Injectable()
 export class Avro implements SchemaEntrypoint {
   static readonly TYPENAME = 'AVRO';
   static readonly INJECT_TOKEN: symbol = Symbol('@ts-messaging/schema-avro');

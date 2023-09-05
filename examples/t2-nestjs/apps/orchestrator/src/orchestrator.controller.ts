@@ -22,7 +22,7 @@ export class OrchestratorController {
   async createOrder(@Body() body: CreateOrderRequest) {
     Logger.log(JSON.stringify(body), 'OrchestratorController.createOrder');
     const key = this.service.createSagaItem(body);
-    await this.kafka.client.produce({
+    const result = await this.kafka.client.produce({
       topic: 'order.saga',
       data: {
         key,
@@ -31,5 +31,9 @@ export class OrchestratorController {
         }),
       },
     });
+    return {
+      key: key,
+      messages: result,
+    };
   }
 }

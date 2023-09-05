@@ -3,14 +3,12 @@ import {
   Cache,
   Client,
   Consumer,
-  Injectable,
   Producer,
   Registry,
   SchemaObject,
   Topic,
 } from '@ts-messaging/common';
 
-@Injectable()
 export abstract class AbstractClient<TTopic extends Topic>
   extends BaseClass
   implements Client

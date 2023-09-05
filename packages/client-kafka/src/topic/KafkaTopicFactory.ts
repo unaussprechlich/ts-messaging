@@ -1,20 +1,30 @@
 import { KafkaTopic } from './KafkaTopic';
 import { AbstractTopicFactory } from '@ts-messaging/client';
 import { Registry } from '@ts-messaging/common';
-import { Admin } from 'kafkajs';
+import { Kafka } from '../Kafka';
 
 export class KafkaTopicFactory extends AbstractTopicFactory {
   constructor(
-    protected readonly admin: Admin,
+    protected readonly kafka: Kafka,
     protected readonly registry: Registry
   ) {
     super();
   }
   async produce(input: { name: string }): Promise<KafkaTopic> {
-    const topics = await this.admin.listTopics();
+    const topics = await this.kafka.admin.listTopics();
 
     if (!topics.includes(input.name)) {
-      throw new Error(`Topic ${input.name} does not exist!`);
+      if (!this.kafka.autoRegisterTopics) {
+        throw new Error(`Topic ${input.name} does not exist!`);
+      }
+
+      await this.kafka.admin.createTopics({
+        topics: [
+          {
+            topic: input.name,
+          },
+        ],
+      });
     }
 
     const keySubject = await this.registry.findSubject(input.name + '-key');

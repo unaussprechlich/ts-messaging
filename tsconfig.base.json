@@ -23,13 +23,9 @@
       "@ts-messaging/common": ["packages/common/src/index.ts"],
       "@ts-messaging/core": ["packages/core/src/index.ts"],
       "@ts-messaging/registry": ["packages/registry/src/index.ts"],
-      "@ts-messaging/registry-confluent": [
-        "packages/registry-confluent/src/index.ts"
-      ],
+      "@ts-messaging/registry-confluent": ["packages/registry-confluent/src/index.ts"],
       "@ts-messaging/schema": ["packages/schema/src/index.ts"],
       "@ts-messaging/schema-avro": ["packages/schema-avro/src/index.ts"],
-      "examples/minimal-kafka": ["examples/minimal-kafka/src/index.ts"],
-      "test": ["test/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp", "dist", ".vscode"]

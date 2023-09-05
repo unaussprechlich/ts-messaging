@@ -1,9 +1,9 @@
 import { Module, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { MessagingController } from '../../inventory/src/messaging.controller';
 import { Confluent } from '@ts-messaging/registry-confluent';
 import { Avro } from '@ts-messaging/schema-avro';
 import { Kafka } from '@ts-messaging/client-kafka';
+import { PaymentMessagingController } from './payment.messaging.controller';
 
 @Module({
   providers: [PaymentService],
@@ -11,14 +11,15 @@ import { Kafka } from '@ts-messaging/client-kafka';
 export class PaymentModule implements OnModuleInit, OnModuleDestroy {
   protected readonly client = new Kafka({
     broker: { brokers: ['localhost:9092'] },
-    consumer: { groupId: 'test' },
+    consumer: { groupId: 'payment' },
     registry: new Confluent({
+      autoRegisterSchemas: true,
       clientConfig: {
         baseUrl: 'http://localhost:8081',
       },
       schemaProviders: [new Avro()],
     }),
-    controllers: [MessagingController],
+    controllers: [PaymentMessagingController],
   });
 
   async onModuleInit() {

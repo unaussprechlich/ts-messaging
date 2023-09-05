@@ -8,7 +8,7 @@ import { OrderSagaMessage } from './schemas/OrderSagaMessage';
 import { SagaReply } from 'lib/saga';
 
 @Kafka.Controller()
-export class MessagingController {
+export class OrchestratorMessagingController {
   @Kafka.InjectClient()
   readonly kafka: Kafka;
 

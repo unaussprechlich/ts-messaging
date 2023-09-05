@@ -1,6 +1,5 @@
 import { AbstractSubject } from '@ts-messaging/registry';
 import {
-  Injectable,
   Logger,
   LoggerChild,
   RawSchema,
@@ -15,7 +14,6 @@ import {
 } from 'ts-schemaregistry';
 import { ConfluentError } from '../ConfluentError';
 
-@Injectable()
 export class ConfluentSubject extends AbstractSubject {
   protected readonly registry: ConfluentRegistry;
 

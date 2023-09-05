@@ -1,6 +1,5 @@
-import { BaseClass, Injectable, Message, Producer } from '@ts-messaging/common';
+import { BaseClass, Message, Producer } from '@ts-messaging/common';
 
-@Injectable()
 export abstract class AbstractProducer extends BaseClass implements Producer {
   abstract connect(): Promise<void>;
   abstract disconnect(): Promise<void>;

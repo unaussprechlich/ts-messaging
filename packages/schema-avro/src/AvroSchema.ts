@@ -2,19 +2,12 @@ import { Type } from 'avsc';
 import { AvroRawSchema } from './AvroRawSchema';
 import { ZodType } from 'zod';
 import { AvroZodTypeFactory } from './AvroZodTypeFactory';
-import {
-  RawSchema,
-  SchemaObject,
-  Injectable,
-  SchemaReflectionHelper,
-  SchemaTypeReflectionHelper,
-} from '@ts-messaging/common';
+import { RawSchema, SchemaObject } from '@ts-messaging/common';
 import { AbstractSchema } from '@ts-messaging/schema';
 import { Avro } from './Avro';
 
 export interface AvroObject extends SchemaObject {}
 
-@Injectable()
 export class AvroSchema<
   T extends AvroObject = AvroObject
 > extends AbstractSchema<T> {

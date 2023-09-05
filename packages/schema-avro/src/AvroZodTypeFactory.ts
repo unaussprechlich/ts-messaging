@@ -1,7 +1,7 @@
 import { AvroTypes, FieldConfig, RecordConfig } from './types';
 import { AvroRawSchema } from './AvroRawSchema';
 import { z, ZodType } from 'zod';
-import { Injectable, SchemaObject } from "@ts-messaging/common";
+import { SchemaObject } from "@ts-messaging/common";
 
 const AvroZodTypes = {
   [AvroTypes.STRING]: () => z.string(),
@@ -22,7 +22,6 @@ const AvroZodTypes = {
   (input: any) => ZodType
 >;
 
-@Injectable()
 export class AvroZodTypeFactory {
   produce<T extends SchemaObject = SchemaObject>(rawSchema: AvroRawSchema) {
     if (rawSchema.schema.type === AvroTypes.RECORD) {

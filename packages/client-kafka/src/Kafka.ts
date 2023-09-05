@@ -20,14 +20,10 @@ import {
 import {
   ClientEntrypoint,
   Constructor,
-  ContainerDI,
-  Injectable,
-  INJECTABLES,
   RegistryEntrypoint,
 } from '@ts-messaging/common';
 import { KafkaTopic, KafkaTopicFactory } from './topic';
 
-@Injectable()
 export class Kafka extends KafkaClient implements ClientEntrypoint {
   static readonly TYPENAME = '@ts-messaging/client-kafka';
   static readonly INJECT_TOKEN: symbol = Symbol('@ts-messaging/client-kafka');
@@ -41,8 +37,6 @@ export class Kafka extends KafkaClient implements ClientEntrypoint {
 
   protected readonly topicFactory: KafkaTopicFactory;
 
-  protected readonly container: ContainerDI;
-
   constructor(config: {
     broker: KafkaConfig;
     consumer: ConsumerConfig;
@@ -50,27 +44,14 @@ export class Kafka extends KafkaClient implements ClientEntrypoint {
     admin?: AdminConfig;
     registry: RegistryEntrypoint;
     controllers: Constructor[];
+    autoRegisterTopics?: boolean;
   }) {
-    super({
-      broker: config.broker,
-      consumer: config.consumer,
-      producer: config.producer,
-      admin: config.admin,
-    });
-    this.container = new ContainerDI();
+    super(config);
     this.controllerConstructors = config.controllers;
     this.registry = config.registry;
 
-    this.container.bind(INJECTABLES.client).toConstantValue(this);
-    this.container.bind(Kafka.INJECT_TOKEN).toConstantValue(this);
-
-    this.container.bind(INJECTABLES.registry).toConstantValue(this.registry);
-    this.container
-      .bind(config.registry.INJECT_TOKEN)
-      .toConstantValue(this.registry);
-
-    this.controllerFactory = new KafkaControllerFactory(this, this.container);
-    this.topicFactory = new KafkaTopicFactory(this.admin, this.registry);
+    this.controllerFactory = new KafkaControllerFactory(this);
+    this.topicFactory = new KafkaTopicFactory(this, this.registry);
   }
 
   async loadTopic(topicName: string): Promise<KafkaTopic> {
@@ -87,6 +68,7 @@ export class Kafka extends KafkaClient implements ClientEntrypoint {
       this.controllers.push(controller);
     }
 
+    await super.internalInit();
     await super.internalInit();
   }
 

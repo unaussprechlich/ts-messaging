@@ -5,7 +5,7 @@ import { OrderService } from './order.service';
 import { OrderSagaMessage } from './schemas/OrderSagaMessage';
 
 @Kafka.Controller()
-export class MessagingController {
+export class OrderMessagingController {
   @Kafka.InjectClient()
   readonly client: Kafka;
 
@@ -16,13 +16,7 @@ export class MessagingController {
     @Kafka.Key() key: SagaKey,
     @Kafka.Value() value: OrderSagaMessage
   ) {
-    Logger.log(
-      {
-        key,
-        value,
-      },
-      'order.saga'
-    );
+    Logger.log({ key, value }, 'order.saga');
 
     if (key.status === 'COMPENSATING') {
       this.orderService.createOrder(value.orderId);

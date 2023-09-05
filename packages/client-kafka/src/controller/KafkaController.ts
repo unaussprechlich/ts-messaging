@@ -1,11 +1,6 @@
 import { KafkaConsumer } from '../client';
 import { KafkaMessage } from '../KafkaMessage';
-import {
-  Injectable,
-  Logger,
-  LoggerChild,
-  MessageEndpoint,
-} from '@ts-messaging/common';
+import { Logger, LoggerChild, MessageEndpoint } from '@ts-messaging/common';
 import { AbstractController } from '@ts-messaging/client';
 import { KafkaParamsReflectionType } from './decorators';
 import { KafkaTopic } from '../topic';
@@ -26,7 +21,6 @@ export interface KafkaMessageEndpoint extends MessageEndpoint<KafkaMessage> {
   endpoint: (...args: any) => Promise<void>;
 }
 
-@Injectable()
 export class KafkaController extends AbstractController {
   readonly name: string;
   readonly consumer: KafkaConsumer;

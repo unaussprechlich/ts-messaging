@@ -1,11 +1,10 @@
 {
   "name": "@ts-messaging/common",
-  "version": "0.0.0-snapshot-20230905160634",
+  "version": "0.0.0-snapshot-20230905172825",
   "dependencies": {
     "pino": "^8.15.0",
     "pino-pretty": "^10.2.0",
     "reflect-metadata": "^0.1.13",
-    "inversify": "^6.0.1",
     "nanoid": "^3.3.6"
   },
   "devDependencies": {

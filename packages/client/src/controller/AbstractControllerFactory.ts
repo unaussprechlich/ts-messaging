@@ -3,10 +3,8 @@ import {
   Constructor,
   Controller,
   ControllerFactory,
-  Injectable,
 } from '@ts-messaging/common';
 
-@Injectable()
 export abstract class AbstractControllerFactory
   extends BaseClass
   implements ControllerFactory

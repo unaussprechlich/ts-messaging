@@ -1,5 +1,14 @@
 # @ts-messaging/client-kafka
 
+## 0.0.0-snapshot-20230905172825
+
+### Patch Changes
+
+- Removed Inversify and added "autoRegisterTopics" as option for the Client
+- Updated dependencies
+  - @ts-messaging/client@0.0.0-snapshot-20230905172825
+  - @ts-messaging/common@0.0.0-snapshot-20230905172825
+
 ## 0.0.0-snapshot-20230905160634
 
 ### Patch Changes
