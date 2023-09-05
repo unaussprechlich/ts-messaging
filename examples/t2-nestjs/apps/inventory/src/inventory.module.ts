@@ -13,7 +13,7 @@ import { MessagingController } from './messaging.controller';
 export class InventoryModule implements OnModuleInit, OnModuleDestroy {
   protected readonly client = new Kafka({
     broker: { brokers: ['localhost:9092'] },
-    consumer: { groupId: 'test' },
+    consumer: { groupId: 'inventory' },
     registry: new Confluent({
       clientConfig: {
         baseUrl: 'http://localhost:8081',

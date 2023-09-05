@@ -16,8 +16,10 @@ export class MessagingController {
 
   @Kafka.Endpoint('order.saga.reply')
   async onSagaOrderReply(
-    @Kafka.Key() key: SagaKey,
-    @Kafka.Value() value: SagaReply
+    @Kafka.Key()
+    key: SagaKey,
+    @Kafka.Value()
+    value: SagaReply
   ) {
     Logger.log({ key, value }, 'order.saga.reply');
 
@@ -31,8 +33,10 @@ export class MessagingController {
 
   @Kafka.Endpoint('inventory.saga.reply')
   async onSagaInventoryReply(
-    @Kafka.Key() key: SagaKey,
-    @Kafka.Value() value: SagaReply
+    @Kafka.Key()
+    key: SagaKey,
+    @Kafka.Value()
+    value: SagaReply
   ) {
     Logger.log({ key, value }, 'inventory.saga.reply');
 
@@ -61,8 +65,10 @@ export class MessagingController {
 
   @Kafka.Endpoint('payment.saga.reply')
   async onSagaPaymentReply(
-    @Kafka.Key() key: SagaKey,
-    @Kafka.Value() value: SagaReply
+    @Kafka.Key()
+    key: SagaKey,
+    @Kafka.Value()
+    value: SagaReply
   ) {
     Logger.log({ key, value }, 'payment.saga.reply');
 

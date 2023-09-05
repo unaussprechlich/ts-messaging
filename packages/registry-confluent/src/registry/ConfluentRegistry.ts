@@ -21,16 +21,19 @@ export class ConfluentRegistry extends AbstractRegistry<ConfluentSubject> {
   });
 
   readonly api: SchemaRegistryApi;
+  autoRegisterSchemas: boolean;
 
   protected readonly subjectFactory: ConfluentSubjectFactory;
 
   protected constructor(config: {
     schemaProviders: SchemaEntrypoint[];
     clientConfig: SchemaRegistryClientConfig;
+    autoRegisterSchemas?: boolean;
   }) {
     super(config.schemaProviders);
     this.api = new SchemaRegistryApi(config.clientConfig);
     this.subjectFactory = new ConfluentSubjectFactory(this);
+    this.autoRegisterSchemas = config.autoRegisterSchemas ?? false;
   }
 
   protected async internalInit(): Promise<void> {

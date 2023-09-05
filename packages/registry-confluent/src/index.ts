@@ -19,6 +19,7 @@ export class Confluent extends ConfluentRegistry implements RegistryEntrypoint {
   constructor(config: {
     schemaProviders: SchemaEntrypoint[];
     clientConfig: SchemaRegistryClientConfig;
+    autoRegisterSchemas?: boolean;
   }) {
     super(config);
   }

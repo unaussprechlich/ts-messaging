@@ -160,7 +160,7 @@ export class ConfluentSubject extends AbstractSubject {
         subject: this,
       };
     } else if (response.status === 404) {
-      if (options?.autoRegister) {
+      if (options?.autoRegister || this.registry.autoRegisterSchemas) {
         this.logger.info(
           `Could not find schemaID for subject with name="${this.name}", trying auto register...`
         );

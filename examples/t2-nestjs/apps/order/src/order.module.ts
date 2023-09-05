@@ -11,7 +11,7 @@ import { Avro } from '@ts-messaging/schema-avro';
 export class OrderModule implements OnModuleInit, OnModuleDestroy {
   protected readonly client = new Kafka({
     broker: { brokers: ['localhost:9092'] },
-    consumer: { groupId: 'test' },
+    consumer: { groupId: 'order' },
     registry: new Confluent({
       clientConfig: {
         baseUrl: 'http://localhost:8081',

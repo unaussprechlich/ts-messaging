@@ -1,5 +1,11 @@
 # @ts-messaging/registry-confluent
 
+## 0.0.0
+
+### Patch Changes
+
+- Added a "autoRegisterSchemas" as a configuration option to the ConfluentRegistry
+
 ## 0.0.0-snapshot-20230905160634
 
 ### Patch Changes
