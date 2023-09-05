@@ -9,6 +9,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.d.ts",
   "publishConfig": {
-    "directory": "./dist"
+    "directory": "./dist",
+    "access": "public"
   }
 }

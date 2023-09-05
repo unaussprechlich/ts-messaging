@@ -11,6 +11,7 @@
     "@ts-messaging/common": "workspace:*"
   },
   "publishConfig": {
-    "directory": "./dist"
+    "directory": "./dist",
+    "access": "public"
   }
 }
