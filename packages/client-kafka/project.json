@@ -8,7 +8,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/client-kafka",
+        "outputPath": "packages/client-kafka/dist",
         "main": "packages/client-kafka/src/index.ts",
         "tsConfig": "packages/client-kafka/tsconfig.lib.json",
         "assets": ["packages/client-kafka/*.md"],

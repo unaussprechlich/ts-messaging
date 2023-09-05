@@ -8,7 +8,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/client",
+        "outputPath": "packages/client/dist",
         "main": "packages/client/src/index.ts",
         "tsConfig": "packages/client/tsconfig.lib.json",
         "assets": ["packages/client/*.md"],

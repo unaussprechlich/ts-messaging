@@ -8,7 +8,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/schema-avro",
+        "outputPath": "packages/schema-avro/dist",
         "main": "packages/schema-avro/src/index.ts",
         "tsConfig": "packages/schema-avro/tsconfig.lib.json",
         "assets": ["packages/schema-avro/*.md"],

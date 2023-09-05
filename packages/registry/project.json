@@ -8,7 +8,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/registry",
+        "outputPath": "packages/registry/dist",
         "main": "packages/registry/src/index.ts",
         "tsConfig": "packages/registry/tsconfig.lib.json",
         "assets": ["packages/registry/*.md"],

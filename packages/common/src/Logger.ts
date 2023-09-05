@@ -1,7 +1,8 @@
 import { pino, Logger as PinoLogger } from 'pino';
 
 const BaseLogger = pino({
-  level: 'debug',
+  //@ts-ignore
+  level: process.env.LOG_LEVEL ?? 'debug',
   name: '@ts-messaging',
   transport: {
     target: 'pino-pretty',

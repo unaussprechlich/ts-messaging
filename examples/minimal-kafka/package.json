@@ -1,18 +1,19 @@
 {
   "name": "@examples/minimal-kafka",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "build": "tsc --build"
+    "start": "ts-node src/index.ts"
   },
   "dependencies": {
-    "@ts-messaging/client-kafka" : "workspace:*",
-    "@ts-messaging/registry-confluent" : "workspace:*",
-    "@ts-messaging/schema-avro" : "workspace:*"
+    "@ts-messaging/client-kafka": "workspace:*",
+    "@ts-messaging/registry-confluent": "workspace:*",
+    "@ts-messaging/schema-avro": "workspace:*"
   },
   "devDependencies": {
     "@tsconfig/node16": "^16.1.0",
     "typescript": "latest",
     "@types/node": "latest",
     "ts-node": "latest"
-  }}
+  }
+}

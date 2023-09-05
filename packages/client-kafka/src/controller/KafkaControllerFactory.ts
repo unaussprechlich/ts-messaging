@@ -130,6 +130,7 @@ export class KafkaControllerFactory extends AbstractControllerFactory {
         key: [],
         value: [],
       },
+      designTypes: {},
       endpoint: endpointFn,
     };
 
@@ -146,6 +147,7 @@ export class KafkaControllerFactory extends AbstractControllerFactory {
         );
       if (schema) {
         endpoint.schema.value.push(schema.schema.__id);
+        endpoint.designTypes.value = reflectedEndpoint.params.value.designType;
       }
     }
 
@@ -158,6 +160,7 @@ export class KafkaControllerFactory extends AbstractControllerFactory {
       );
       if (schema) {
         endpoint.schema.key.push(schema.schema.__id);
+        endpoint.designTypes.key = reflectedEndpoint.params.key.designType;
       }
     }
 

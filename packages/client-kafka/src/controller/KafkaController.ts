@@ -5,11 +5,11 @@ import {
   Logger,
   LoggerChild,
   MessageEndpoint,
-  Topic,
 } from '@ts-messaging/common';
 import { AbstractController } from '@ts-messaging/client';
 import { KafkaParamsReflectionType } from './decorators';
 import { KafkaTopic } from '../topic';
+import 'reflect-metadata';
 
 export interface KafkaMessageEndpoint extends MessageEndpoint<KafkaMessage> {
   topicName: string;
@@ -19,6 +19,10 @@ export interface KafkaMessageEndpoint extends MessageEndpoint<KafkaMessage> {
     value: number[];
   };
   params: KafkaParamsReflectionType[];
+  designTypes: {
+    key?: any;
+    value?: any;
+  };
   endpoint: (...args: any) => Promise<void>;
 }
 
@@ -81,7 +85,7 @@ export class KafkaController extends AbstractController {
       };
     }
 
-    for (const { schema, endpoint, params } of endpoints) {
+    for (const { schema, endpoint, params, designTypes } of endpoints) {
       //No match for the key schema
       if (!this.matcheSchema(schema.key, message.schema?.key?.__id ?? null)) {
         continue;
@@ -98,12 +102,31 @@ export class KafkaController extends AbstractController {
 
       for (const param of params) {
         switch (param.type) {
-          case 'key':
-            args[param.parameterIndex] = message.data.key;
+          case 'key': {
+            if (designTypes.key) {
+              args[param.parameterIndex] = this.processWithDesignType(
+                message.data.key,
+                designTypes.key
+              );
+            } else {
+              args[param.parameterIndex] = message.data.key;
+            }
+
             break;
-          case 'value':
-            args[param.parameterIndex] = message.data.value;
+          }
+
+          case 'value': {
+            if (designTypes.value) {
+              args[param.parameterIndex] = this.processWithDesignType(
+                message.data.value,
+                designTypes.value
+              );
+            } else {
+              args[param.parameterIndex] = message.data.value;
+            }
             break;
+          }
+
           case 'headers':
             args[param.parameterIndex] = message.meta.headers;
             break;
@@ -122,6 +145,27 @@ export class KafkaController extends AbstractController {
     return {
       invocations,
     };
+  }
+
+  private processWithDesignType(source: any, DesignType: any) {
+    const target = Object.assign(new DesignType(), source);
+    //Metadata
+    for (const reflectionKey of Reflect.getMetadataKeys(source)) {
+      Reflect.defineMetadata(
+        reflectionKey,
+        Reflect.getMetadata(reflectionKey, source),
+        target
+      );
+    }
+    //Constructor Metadata
+    for (const reflectionKey of Reflect.getMetadataKeys(source.constructor)) {
+      Reflect.defineMetadata(
+        reflectionKey,
+        Reflect.getMetadata(reflectionKey, source),
+        target.constructor
+      );
+    }
+    return target;
   }
 
   private matcheSchema(callbackSchema: number[], messageSchema: number | null) {

@@ -11,6 +11,7 @@ import {
   MagicByteSerializer,
   Schema,
   CompatabilityStrategy,
+  SchemaTypeReflectionHelper,
 } from '@ts-messaging/common';
 
 export abstract class AbstractSubject extends BaseClass implements Subject {
@@ -48,6 +49,21 @@ export abstract class AbstractSubject extends BaseClass implements Subject {
     }
 
     const decoded = schemaAndVersion.schema.decode(magic.payload);
+
+    const reflectionHelper = new ReflectionHelper<{
+      __id: number;
+      version: number;
+    }>(`__schema::Registry(${this.registry.__uid})::Subject(${this.__uid})`);
+
+    SchemaReflectionHelper.annotate(decoded, schemaAndVersion.schema.rawSchema);
+    SchemaTypeReflectionHelper.annotate(
+      decoded,
+      schemaAndVersion.schema.__type
+    );
+    reflectionHelper.annotate(decoded, {
+      __id: schemaAndVersion.schema.__id,
+      version: schemaAndVersion.version,
+    });
 
     this.logger.info(
       `Decoded object="${decoded.constructor.name}" for subject="${this.name}" with version="${schemaAndVersion.version}" and schema="${schemaAndVersion.schema.__id}".`
@@ -120,7 +136,7 @@ export abstract class AbstractSubject extends BaseClass implements Subject {
     const reflectionHelper = new ReflectionHelper<{
       __id: number;
       version: number;
-    }>(`__schema::Registry(${this.registry.__uid}::Subject(${this.__uid})`);
+    }>(`__schema::Registry(${this.registry.__uid})::Subject(${this.__uid})`);
 
     const reflectedSchemaId = reflectionHelper.useReflect(
       schemaObjectConstructor

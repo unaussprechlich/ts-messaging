@@ -87,7 +87,6 @@ export abstract class KafkaClient
       ...this.consumers.map((c) => c.init()),
       ...this.producers.map((c) => c.init()),
     ]);
-    await this.connect();
     this.logger.info('KafkaClient initialized!');
   }
 

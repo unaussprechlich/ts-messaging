@@ -2,7 +2,13 @@ import { Type } from 'avsc';
 import { AvroRawSchema } from './AvroRawSchema';
 import { ZodType } from 'zod';
 import { AvroZodTypeFactory } from './AvroZodTypeFactory';
-import { RawSchema, SchemaObject, Injectable } from '@ts-messaging/common';
+import {
+  RawSchema,
+  SchemaObject,
+  Injectable,
+  SchemaReflectionHelper,
+  SchemaTypeReflectionHelper,
+} from '@ts-messaging/common';
 import { AbstractSchema } from '@ts-messaging/schema';
 import { Avro } from './Avro';
 
