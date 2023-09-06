@@ -9,6 +9,7 @@ export class KafkaProvider implements OnModuleInit, OnModuleDestroy {
   readonly client = new Kafka({
     broker: { brokers: ['localhost:9092'] },
     consumer: { groupId: 'orchestrator' },
+    autoRegisterTopics: true,
     registry: new Confluent({
       autoRegisterSchemas: true,
       clientConfig: {

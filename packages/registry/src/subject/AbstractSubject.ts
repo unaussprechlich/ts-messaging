@@ -11,14 +11,30 @@ import {
   MagicByteSerializer,
   Schema,
   CompatabilityStrategy,
-  SchemaTypeReflectionHelper,
 } from '@ts-messaging/common';
 
 export abstract class AbstractSubject extends BaseClass implements Subject {
-  abstract readonly name: string;
-  abstract readonly compatabilityStrategy: CompatabilityStrategy;
+  readonly name: string;
+  readonly compatabilityStrategy: CompatabilityStrategy;
 
   protected abstract readonly registry: Registry;
+
+  protected subjectContractReflectionHelper: ReflectionHelper<{
+    __id: number;
+    version: number;
+  }>;
+
+  protected constructor(
+    name: string,
+    compatabilityStrategy: CompatabilityStrategy
+  ) {
+    super();
+    this.name = name;
+    this.subjectContractReflectionHelper = new ReflectionHelper(
+      `__subject::${this.name}(${this.__uid})`
+    );
+    this.compatabilityStrategy = compatabilityStrategy;
+  }
 
   async decode<T extends SchemaObject = SchemaObject>(
     buffer: Buffer
@@ -50,23 +66,13 @@ export abstract class AbstractSubject extends BaseClass implements Subject {
 
     const decoded = schemaAndVersion.schema.decode(magic.payload);
 
-    const reflectionHelper = new ReflectionHelper<{
-      __id: number;
-      version: number;
-    }>(`__schema::Registry(${this.registry.__uid})::Subject(${this.__uid})`);
-
-    SchemaReflectionHelper.annotate(decoded, schemaAndVersion.schema.rawSchema);
-    SchemaTypeReflectionHelper.annotate(
-      decoded,
-      schemaAndVersion.schema.__type
-    );
-    reflectionHelper.annotate(decoded, {
+    this.subjectContractReflectionHelper.annotate(decoded, {
       __id: schemaAndVersion.schema.__id,
       version: schemaAndVersion.version,
     });
 
     this.logger.info(
-      `Decoded object="${decoded.constructor.name}" for subject="${this.name}" with version="${schemaAndVersion.version}" and schema="${schemaAndVersion.schema.__id}".`
+      `Decoded object="${decoded?.constructor?.name}" for subject="${this.name}" with version="${schemaAndVersion.version}" and schema="${schemaAndVersion.schema.__id}".`
     );
 
     return {
@@ -113,7 +119,7 @@ export abstract class AbstractSubject extends BaseClass implements Subject {
     );
 
     this.logger.info(
-      `Encoded object="${schemaObject}" for subject="${this.name}" with version="${schemaAndVersion.version}" and schema="${schemaAndVersion.schema.__id}".`
+      `Encoded object="${schemaObject?.constructor?.name}" for subject="${this.name}" with version="${schemaAndVersion.version}" and schema="${schemaAndVersion.schema.__id}".`
     );
 
     return {
@@ -133,12 +139,7 @@ export abstract class AbstractSubject extends BaseClass implements Subject {
     schemaObjectConstructor: Constructor<T>,
     options?: { autoRegister?: boolean }
   ): Promise<Contract<T> | null> {
-    const reflectionHelper = new ReflectionHelper<{
-      __id: number;
-      version: number;
-    }>(`__schema::Registry(${this.registry.__uid})::Subject(${this.__uid})`);
-
-    const reflectedSchemaId = reflectionHelper.useReflect(
+    const reflectedSchemaId = this.subjectContractReflectionHelper.useReflect(
       schemaObjectConstructor
     );
 
@@ -146,9 +147,13 @@ export abstract class AbstractSubject extends BaseClass implements Subject {
       return this.findByVersion<T>(reflectedSchemaId.version);
     }
 
-    const rawSchema = SchemaReflectionHelper.useSafeReflectWithError(
+    const rawSchema = SchemaReflectionHelper.useReflect(
       schemaObjectConstructor
     );
+
+    if (!rawSchema) {
+      return null;
+    }
 
     const contract = await this.findByRawSchema<T>(rawSchema, options);
 
@@ -156,7 +161,7 @@ export abstract class AbstractSubject extends BaseClass implements Subject {
       return null;
     }
 
-    reflectionHelper.annotate(schemaObjectConstructor, {
+    this.subjectContractReflectionHelper.annotate(schemaObjectConstructor, {
       __id: contract.schema.__id,
       version: contract.version,
     });

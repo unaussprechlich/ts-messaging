@@ -2,7 +2,12 @@ import { Type } from 'avsc';
 import { AvroRawSchema } from './AvroRawSchema';
 import { ZodType } from 'zod';
 import { AvroZodTypeFactory } from './AvroZodTypeFactory';
-import { RawSchema, SchemaObject } from '@ts-messaging/common';
+import {
+  RawSchema,
+  SchemaObject,
+  SchemaReflectionHelper,
+  SchemaTypeReflectionHelper,
+} from '@ts-messaging/common';
 import { AbstractSchema } from '@ts-messaging/schema';
 import { Avro } from './Avro';
 
@@ -33,7 +38,10 @@ export class AvroSchema<
   }
 
   decode(buffer: Buffer): T {
-    return this.schemaType.fromBuffer(buffer) as T;
+    const decoded = Object.assign({}, this.schemaType.fromBuffer(buffer));
+    SchemaReflectionHelper.annotate(decoded, this.rawSchema);
+    SchemaTypeReflectionHelper.annotate(decoded, this.__type);
+    return decoded as T;
   }
 
   validate(data: T) {

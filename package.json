@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build::all": "nx run-many --target=build --exclude test",
+    "build::all": "nx run-many --target=build --exclude test --parallel=false",
     "test::all": "nx run-many --target=test",
     "lint::all": "nx run-many --target=lint",
     "changeset::add" : "pnpm changeset add",

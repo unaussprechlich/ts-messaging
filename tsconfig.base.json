@@ -17,7 +17,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "types": ["vitest/globals", "vitest/importMeta", "node"],
-    "paths": {
+    /*"paths": {
       "@ts-messaging/client": ["packages/client/src/index.ts"],
       "@ts-messaging/client-kafka": ["packages/client-kafka/src/index.ts"],
       "@ts-messaging/common": ["packages/common/src/index.ts"],
@@ -26,7 +26,7 @@
       "@ts-messaging/registry-confluent": ["packages/registry-confluent/src/index.ts"],
       "@ts-messaging/schema": ["packages/schema/src/index.ts"],
       "@ts-messaging/schema-avro": ["packages/schema-avro/src/index.ts"],
-    }
+    }*/
   },
   "exclude": ["node_modules", "tmp", "dist", ".vscode"]
 }

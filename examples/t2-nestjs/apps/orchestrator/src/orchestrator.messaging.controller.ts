@@ -3,7 +3,7 @@ import { Kafka } from '@ts-messaging/client-kafka';
 import { SagaKey } from 'lib/saga/schemas/SagaKey';
 import { OrchestratorService } from './orchestrator.service';
 import { InventorySagaMessage } from './schemas/InventorySagaMessage';
-import { PaymentSagaMessage } from '../../payment/src/schemas/PaymentSagaMessage';
+import { PaymentSagaMessage } from './schemas/PaymentSagaMessage';
 import { OrderSagaMessage } from './schemas/OrderSagaMessage';
 import { SagaReply } from 'lib/saga';
 
@@ -25,9 +25,11 @@ export class OrchestratorMessagingController {
 
     if (value.success && key.status === 'CONTINUE') {
       key.index++;
-      return await this.sendToInventory(key);
+      await this.sendToInventory(key);
+      return;
     } else {
-      return await this.rejectSaga(key);
+      await this.rejectSaga(key);
+      return;
     }
   }
 
@@ -44,20 +46,24 @@ export class OrchestratorMessagingController {
       if (!value.success) {
         key.status = 'COMPENSATING';
         key.index--;
-        return await this.sendToOrder(key);
+        await this.sendToOrder(key);
+        return;
       }
 
       key.index++;
-      return await this.sendToPayment(key);
+      await this.sendToPayment(key);
+      return;
     }
 
     if (key.status === 'COMPENSATING') {
       if (!value.success) {
-        return await this.rejectSaga(key);
+        await this.rejectSaga(key);
+        return;
       }
 
       key.index--;
-      return await this.sendToPayment(key);
+      await this.sendToPayment(key);
+      return;
     }
 
     throw new Error('Invalid status');
@@ -76,17 +82,19 @@ export class OrchestratorMessagingController {
       if (!value.success) {
         key.status = 'COMPENSATING';
         key.index--;
-        return await this.sendToInventory(key);
+        await this.sendToInventory(key);
+        return;
       }
 
       key.status = 'COMPLETED';
-      return await this.kafka.produce({
+      await this.kafka.produce({
         topic: 'saga.completed',
         data: {
           key,
           value: this.orchestratorService.findSagaItem(key),
         },
       });
+      return;
     }
 
     throw new Error('Invalid status');

@@ -12,6 +12,7 @@ export class PaymentModule implements OnModuleInit, OnModuleDestroy {
   protected readonly client = new Kafka({
     broker: { brokers: ['localhost:9092'] },
     consumer: { groupId: 'payment' },
+    autoRegisterTopics: true,
     registry: new Confluent({
       autoRegisterSchemas: true,
       clientConfig: {

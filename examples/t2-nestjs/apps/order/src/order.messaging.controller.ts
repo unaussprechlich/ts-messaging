@@ -3,6 +3,7 @@ import { Kafka } from '@ts-messaging/client-kafka';
 import { SagaKey } from 'lib/saga/schemas/SagaKey';
 import { OrderService } from './order.service';
 import { OrderSagaMessage } from './schemas/OrderSagaMessage';
+import { SagaReply } from 'lib/saga';
 
 @Kafka.Controller()
 export class OrderMessagingController {
@@ -18,18 +19,32 @@ export class OrderMessagingController {
   ) {
     Logger.log({ key, value }, 'order.saga');
 
-    if (key.status === 'COMPENSATING') {
-      this.orderService.createOrder(value.orderId);
-    } else if (key.status === 'CONTINUE') {
-      this.orderService.rejectOrder(value.orderId);
-    }
+    try {
+      if (key.status === 'COMPENSATING') {
+        this.orderService.rejectOrder(value.orderId);
+      } else if (key.status === 'CONTINUE') {
+        this.orderService.createOrder(value.orderId);
+      }
 
-    await this.client.produce({
-      topic: 'order.saga.reply',
-      data: {
-        key: SagaKey,
-        value: { success: true },
-      },
-    });
+      await this.client.produce({
+        topic: 'order.saga.reply',
+        data: {
+          key: key,
+          value: new SagaReply({
+            success: true,
+          }),
+        },
+      });
+    } catch (e) {
+      await this.client.produce({
+        topic: 'order.saga.reply',
+        data: {
+          key: key,
+          value: new SagaReply({
+            success: false,
+          }),
+        },
+      });
+    }
   }
 }

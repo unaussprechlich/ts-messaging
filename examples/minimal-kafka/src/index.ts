@@ -47,20 +47,21 @@ class TestController {
   //Define a message endpoint
   @Kafka.Endpoint('test-topic')
   async onMessage(
-    @Kafka.Key({
-      autoRegister: true,
-    })
-    key: TestKey,
-    @Kafka.Value({
-      autoRegister: true,
-    })
-    value: TestValue,
+    @Kafka.Key() key: TestKey,
+    @Kafka.Value() value: TestValue,
     @Kafka.Metadata() meta: KafkaMetadata
   ) {
     if (Math.random() > 0.5) {
       throw new Error('Random error!');
     }
     console.log('[MyEndpoint] Message offset=' + meta.offset);
+    await this.kafka.produce({
+      topic: 'test-topic.reply',
+      data: {
+        key: key,
+        value: { success: true },
+      },
+    });
   }
 
   //Intercept errors
@@ -79,11 +80,13 @@ class TestController {
 const client = new Kafka({
   broker: { brokers: ['localhost:9092'] },
   consumer: { groupId: 'test' },
+  autoRegisterTopics: true,
   registry: new Confluent({
     clientConfig: {
       baseUrl: 'http://localhost:8081',
     },
     schemaProviders: [new Avro()],
+    autoRegisterSchemas: true,
   }),
   controllers: [TestController],
 });
@@ -100,6 +103,7 @@ async function sendSomething() {
 
 async function main() {
   await client.init();
+  await client.connect();
   setInterval((args) => {
     sendSomething().catch(console.error);
   }, 20000);

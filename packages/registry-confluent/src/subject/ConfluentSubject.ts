@@ -26,11 +26,11 @@ export class ConfluentSubject extends AbstractSubject {
   protected readonly versions = new Map<number, number>();
 
   constructor(
-    readonly name: string,
-    readonly compatabilityStrategy: CompatabilityStrategy,
+    name: string,
+    compatabilityStrategy: CompatabilityStrategy,
     registry: ConfluentRegistry
   ) {
-    super();
+    super(name, compatabilityStrategy);
     this.registry = registry;
   }
 

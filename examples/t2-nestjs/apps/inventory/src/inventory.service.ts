@@ -49,11 +49,11 @@ export class InventoryService {
 
     const reservation = inventoryItem.addReservation(
       sessionId,
-      z.number().int().positive().parse(units),
+      z.number().int().positive().parse(units)
     );
 
     this.reservationRepository.save(reservation);
 
-    return inventoryItem;
+    return reservation;
   }
 }

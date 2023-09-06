@@ -7,7 +7,7 @@ export class SagaReply {
   @Avro.Boolean()
   success: boolean;
 
-  constructor(args: { success: boolean }) {
-    this.success = args.success;
+  constructor(args?: { success?: boolean }) {
+    this.success = args?.success ?? false;
   }
 }

@@ -29,25 +29,13 @@ export class KafkaProducer extends AbstractProducer {
     message: KafkaMessage,
     options?: Exclude<ProducerRecord, 'messages' | 'topic'>
   ): Promise<RecordMetadata[]> {
-    const processedMessage = await this.processMessage(message);
+    const kafkaJsMessage = await message.toKafkaJsMessage();
 
     return this.producer.send({
       topic: message.topic.name,
-      messages: [processedMessage],
+      messages: [kafkaJsMessage],
       ...options,
     });
-  }
-
-  private async processMessage(message: KafkaMessage): Promise<MessageKafkaJs> {
-    const encoded = await message.topic.encodeMessageData(message.data);
-
-    return {
-      key: encoded.key?.result,
-      value: encoded.value.result,
-      headers: message.meta.headers,
-      timestamp: message.meta.timestamp,
-      partition: message.meta.partition,
-    };
   }
 
   async connect(): Promise<void> {

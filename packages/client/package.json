@@ -1,6 +1,6 @@
 {
   "name": "@ts-messaging/client",
-  "version": "0.0.0-snapshot-20230905172825",
+  "version": "0.0.0",
   "dependencies": {
     "@ts-messaging/common": "workspace:*"
   },

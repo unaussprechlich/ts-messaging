@@ -1,4 +1,4 @@
-import type { IHeaders } from 'kafkajs';
+import type { IHeaders, Message as MessageKafkaJs } from 'kafkajs';
 import {
   MessageData,
   MessageMetadata,
@@ -56,5 +56,17 @@ export class KafkaMessage<
     this.data = args.data;
     this.meta = args.meta ?? {};
     this.schema = args.schema ?? null;
+  }
+
+  async toKafkaJsMessage(): Promise<MessageKafkaJs> {
+    const encoded = await this.topic.encodeMessageData(this.data);
+
+    return {
+      key: encoded.key?.result,
+      value: encoded.value.result,
+      headers: this.meta.headers,
+      timestamp: this.meta.timestamp,
+      partition: this.meta.partition,
+    };
   }
 }

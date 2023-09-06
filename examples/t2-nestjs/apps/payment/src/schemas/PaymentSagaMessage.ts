@@ -15,16 +15,4 @@ export class PaymentSagaMessage {
 
   @Avro.Double()
   total: number;
-
-  constructor(args: {
-    cardNumber: string;
-    cardOwner: string;
-    checksum: string;
-    total: number;
-  }) {
-    this.cardNumber = args.cardNumber;
-    this.cardOwner = args.cardOwner;
-    this.checksum = args.checksum;
-    this.total = args.total;
-  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@ts-messaging/registry-confluent",
-  "version": "0.0.0-snapshot-20230905172825",
+  "version": "0.0.0",
   "dependencies": {
     "ts-schemaregistry": "0.0.9",
     "@ts-messaging/common": "workspace:*",

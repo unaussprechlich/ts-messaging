@@ -2,14 +2,15 @@ import { Controller, Post, Body, Logger } from '@nestjs/common';
 import { OrchestratorService } from './orchestrator.service';
 import { KafkaProvider } from './kafka.provider';
 import { OrderSagaMessage } from './schemas/OrderSagaMessage';
+import { z } from 'zod';
 
-interface CreateOrderRequest {
-  sessionId: string;
-  cardNumber: string;
-  cardOwner: string;
-  checksum: string;
-  total: number;
-}
+export const CreateOrderBody = z.object({
+  sessionId: z.string(),
+  cardNumber: z.string(),
+  cardOwner: z.string(),
+  checksum: z.string(),
+  total: z.number(),
+});
 
 @Controller()
 export class OrchestratorController {
@@ -19,9 +20,9 @@ export class OrchestratorController {
   ) {}
 
   @Post()
-  async createOrder(@Body() body: CreateOrderRequest) {
+  async createOrder(@Body() body: z.infer<typeof CreateOrderBody>) {
     Logger.log(JSON.stringify(body), 'OrchestratorController.createOrder');
-    const key = this.service.createSagaItem(body);
+    const key = this.service.createSagaItem(CreateOrderBody.parse(body));
     const result = await this.kafka.client.produce({
       topic: 'order.saga',
       data: {

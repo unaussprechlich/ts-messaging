@@ -3,6 +3,7 @@ import { Kafka } from '@ts-messaging/client-kafka';
 import { SagaKey } from 'lib/saga/schemas/SagaKey';
 import { InventoryService } from './inventory.service';
 import { InventorySagaMessage } from './schemas/InventorySagaMessage';
+import { SagaReply } from 'lib/saga';
 
 @Kafka.Controller()
 export class InventoryMessagingController {
@@ -16,26 +17,30 @@ export class InventoryMessagingController {
     @Kafka.Key() key: SagaKey,
     @Kafka.Value() value: InventorySagaMessage
   ) {
-    Logger.log(
-      {
-        key,
-        value,
-      },
-      'onCommitReservations'
-    );
+    Logger.log({ key, value }, 'onSaga');
 
-    if (key.status === 'COMPENSATING') {
-      this.inventoryService.deleteReservations(value.sessionId);
-    } else if (key.status === 'CONTINUE') {
-      this.inventoryService.commitReservations(value.sessionId);
+    try {
+      if (key.status === 'COMPENSATING') {
+        this.inventoryService.deleteReservations(value.sessionId);
+      } else if (key.status === 'CONTINUE') {
+        this.inventoryService.commitReservations(value.sessionId);
+      }
+
+      await this.client.produce({
+        topic: 'inventory.saga.reply',
+        data: {
+          key: key,
+          value: new SagaReply({ success: true }),
+        },
+      });
+    } catch (e) {
+      await this.client.produce({
+        topic: 'inventory.saga.reply',
+        data: {
+          key: key,
+          value: new SagaReply({ success: false }),
+        },
+      });
     }
-
-    await this.client.produce({
-      topic: 'inventory.saga.reply',
-      data: {
-        key: SagaKey,
-        value: { success: true },
-      },
-    });
   }
 }

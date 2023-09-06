@@ -4,7 +4,12 @@ import { Logger, LoggerChild, MessageEndpoint } from '@ts-messaging/common';
 import { AbstractController } from '@ts-messaging/client';
 import { KafkaParamsReflectionType } from './decorators';
 import { KafkaTopic } from '../topic';
-import 'reflect-metadata';
+
+export type ErrorHandler = (
+  topic: KafkaTopic,
+  message: KafkaMessage,
+  error: Error | unknown
+) => Promise<boolean>;
 
 export interface KafkaMessageEndpoint extends MessageEndpoint<KafkaMessage> {
   topicName: string;
@@ -24,34 +29,21 @@ export interface KafkaMessageEndpoint extends MessageEndpoint<KafkaMessage> {
 export class KafkaController extends AbstractController {
   readonly name: string;
   readonly consumer: KafkaConsumer;
+
   protected readonly logger: Logger = LoggerChild({
     package: 'client-kafka',
     name: `KafkaController:${this.name}`,
     uuid: this.__uid,
   });
-
   protected readonly endpointRegistry: Map<string, KafkaMessageEndpoint[]> =
     new Map();
-
-  protected readonly onErrorHandler:
-    | ((
-        topic: KafkaTopic,
-        message: KafkaMessage,
-        error: Error | unknown
-      ) => Promise<boolean>)
-    | null;
+  protected readonly onErrorHandler: ErrorHandler | null;
 
   constructor(
     name: string,
     consumer: KafkaConsumer,
     endpoints: KafkaMessageEndpoint[],
-    onErrorHandler:
-      | ((
-          topic: KafkaTopic,
-          message: KafkaMessage,
-          error: Error | unknown
-        ) => Promise<boolean>)
-      | null
+    onErrorHandler: ErrorHandler | null
   ) {
     super();
     for (const endpoint of endpoints) {
@@ -67,6 +59,11 @@ export class KafkaController extends AbstractController {
     this.onErrorHandler = onErrorHandler;
   }
 
+  /**
+   * This method is called by the consumer when a message is received. It will automatically handel the distribution of
+   * the message to the endpoints.
+   * @param message
+   */
   async handleMessage(message: KafkaMessage): Promise<{
     invocations: number;
   }> {
@@ -80,15 +77,15 @@ export class KafkaController extends AbstractController {
     }
 
     for (const { schema, endpoint, params, designTypes } of endpoints) {
-      //No match for the key schema
       if (!this.matcheSchema(schema.key, message.schema?.key?.__id ?? null)) {
+        //No match for the key schema
         continue;
       }
 
-      //No match for the value schema
       if (
         !this.matcheSchema(schema.value, message.schema?.value?.__id ?? null)
       ) {
+        //No match for the value schema
         continue;
       }
 
@@ -141,27 +138,48 @@ export class KafkaController extends AbstractController {
     };
   }
 
+  /**
+   * Move the metadata and constructor metadata to the target this is required to
+   * resolve the design types and annotate the object for future use with the already known schema.
+   * @param source
+   * @param DesignType
+   * @private
+   */
   private processWithDesignType(source: any, DesignType: any) {
+    //Move the data
     const target = Object.assign(new DesignType(), source);
-    //Metadata
+
+    //Move Metadata to Constructor if not already defined
     for (const reflectionKey of Reflect.getMetadataKeys(source)) {
-      Reflect.defineMetadata(
-        reflectionKey,
-        Reflect.getMetadata(reflectionKey, source),
-        target
-      );
-    }
-    //Constructor Metadata
-    for (const reflectionKey of Reflect.getMetadataKeys(source.constructor)) {
+      if (Reflect.hasMetadata(reflectionKey, source.constructor)) {
+        continue;
+      }
       Reflect.defineMetadata(
         reflectionKey,
         Reflect.getMetadata(reflectionKey, source),
         target.constructor
       );
     }
-    return target;
+    //Move constructor Metadata if not already defined
+    for (const reflectionKey of Reflect.getMetadataKeys(source.constructor)) {
+      if (Reflect.hasMetadata(reflectionKey, source.constructor)) {
+        continue;
+      }
+      Reflect.defineMetadata(
+        reflectionKey,
+        Reflect.getMetadata(reflectionKey, source),
+        target.constructor
+      );
+    }
+    return Object.seal(target);
   }
 
+  /**
+   * Check if the schema matches always matched if not schema is defined.
+   * @param callbackSchema
+   * @param messageSchema
+   * @private
+   */
   private matcheSchema(callbackSchema: number[], messageSchema: number | null) {
     if (callbackSchema.length === 0) {
       return true;
@@ -172,6 +190,12 @@ export class KafkaController extends AbstractController {
     }
   }
 
+  /**
+   * Calls the error handler of the controller if defined otherwise throws the error.
+   * @param topic
+   * @param message
+   * @param error
+   */
   async handleError(
     topic: KafkaTopic,
     message: KafkaMessage,
