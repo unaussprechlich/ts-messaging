@@ -1,14 +1,16 @@
 import {
   Message,
-  MessageData,
   MessageMetadata,
-  MessageSchema,
-  Topic,
+  Channel,
+  SchemaObject,
+  ContractVersion,
 } from '@ts-messaging/common';
 
-export abstract class AbstractMessage implements Message {
-  abstract readonly data: MessageData;
+export abstract class AbstractMessage<T extends SchemaObject = any>
+  implements Message<T>
+{
+  abstract readonly payload: T | null;
+  abstract readonly contractVersion: ContractVersion<T> | null;
   abstract readonly meta: MessageMetadata;
-  abstract readonly schema: MessageSchema | null;
-  abstract readonly topic: Topic;
+  abstract readonly channel: Channel;
 }

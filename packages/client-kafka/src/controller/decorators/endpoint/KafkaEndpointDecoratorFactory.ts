@@ -5,7 +5,7 @@ import {
 } from './KafkaEndpointReflections';
 import { KafkaControllerEndpointsReflections } from '../controller';
 
-export function KafkaEndpointDecoratorFactory(topicName: string) {
+export function KafkaEndpointDecoratorFactory(channelName: string) {
   return function decorator<Target extends object>(
     target: Target,
     key: any,
@@ -19,7 +19,7 @@ export function KafkaEndpointDecoratorFactory(topicName: string) {
     );
 
     const endpoint: KafkaEndpointReflectionType = {
-      topicName: topicName,
+      channelName: channelName,
       params: params,
     };
 

@@ -1,4 +1,4 @@
 export * from './controller';
 export * from './endpoint';
 export * from './client';
-export * from './error';
+export * from './producer';

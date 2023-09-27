@@ -14,10 +14,10 @@ import { SchemaEntrypoint } from '@ts-messaging/common';
 export class Avro implements SchemaEntrypoint {
   static readonly TYPENAME = 'AVRO';
   static readonly INJECT_TOKEN: symbol = Symbol('@ts-messaging/schema-avro');
-
   readonly TYPENAME = Avro.TYPENAME;
   readonly INJECT_TOKEN = Avro.INJECT_TOKEN;
-  readonly SchemaFactoryConstructor = AvroSchemaFactory;
+
+  readonly schemaFactory = new AvroSchemaFactory();
 
   static readonly Record = RecordSchemaDecoratorFactory;
   static readonly Boolean = BooleanSchemaDecoratorFactory;

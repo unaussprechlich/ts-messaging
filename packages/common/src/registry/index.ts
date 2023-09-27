@@ -1,3 +1,3 @@
 export * from './Registry';
-export * from './subject';
+export * from './Contract';
 export * from './RegistryEntrypoint';

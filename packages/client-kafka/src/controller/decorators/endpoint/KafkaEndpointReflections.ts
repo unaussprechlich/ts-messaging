@@ -2,7 +2,7 @@ import { Constructor, ReflectionHelper } from '@ts-messaging/common';
 import { KafkaEndpointParamTypes } from './index';
 
 export type KafkaEndpointReflectionType = {
-  topicName: string;
+  channelName: string;
   params: KafkaEndpointSupportedParamsType;
 };
 

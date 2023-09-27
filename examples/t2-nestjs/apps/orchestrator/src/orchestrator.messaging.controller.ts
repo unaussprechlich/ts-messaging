@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { Kafka } from '@ts-messaging/client-kafka';
+import { Kafka, KafkaProducer } from '@ts-messaging/client-kafka';
 import { SagaKey } from 'lib/saga/schemas/SagaKey';
 import { OrchestratorService } from './orchestrator.service';
 import { InventorySagaMessage } from './schemas/InventorySagaMessage';
@@ -7,10 +7,15 @@ import { PaymentSagaMessage } from './schemas/PaymentSagaMessage';
 import { OrderSagaMessage } from './schemas/OrderSagaMessage';
 import { SagaReply } from 'lib/saga';
 
-@Kafka.Controller()
+@Kafka.Controller({
+  consumer: { groupId: 'orchestrator' },
+})
 export class OrchestratorMessagingController {
   @Kafka.InjectClient()
   readonly kafka: Kafka;
+
+  @Kafka.Producer()
+  readonly producer: KafkaProducer;
 
   protected readonly orchestratorService = new OrchestratorService();
 
@@ -18,12 +23,12 @@ export class OrchestratorMessagingController {
   async onSagaOrderReply(
     @Kafka.Key()
     key: SagaKey,
-    @Kafka.Value()
-    value: SagaReply
+    @Kafka.Payload()
+    payload: SagaReply
   ) {
-    Logger.log({ key, value }, 'order.saga.reply');
+    Logger.log({ key, payload }, 'order.saga.reply');
 
-    if (value.success && key.status === 'CONTINUE') {
+    if (payload.success && key.status === 'CONTINUE') {
       key.index++;
       await this.sendToInventory(key);
       return;
@@ -37,13 +42,13 @@ export class OrchestratorMessagingController {
   async onSagaInventoryReply(
     @Kafka.Key()
     key: SagaKey,
-    @Kafka.Value()
-    value: SagaReply
+    @Kafka.Payload()
+    payload: SagaReply
   ) {
-    Logger.log({ key, value }, 'inventory.saga.reply');
+    Logger.log({ key, payload }, 'inventory.saga.reply');
 
     if (key.status === 'CONTINUE') {
-      if (!value.success) {
+      if (!payload.success) {
         key.status = 'COMPENSATING';
         key.index--;
         await this.sendToOrder(key);
@@ -56,7 +61,7 @@ export class OrchestratorMessagingController {
     }
 
     if (key.status === 'COMPENSATING') {
-      if (!value.success) {
+      if (!payload.success) {
         await this.rejectSaga(key);
         return;
       }
@@ -73,13 +78,13 @@ export class OrchestratorMessagingController {
   async onSagaPaymentReply(
     @Kafka.Key()
     key: SagaKey,
-    @Kafka.Value()
-    value: SagaReply
+    @Kafka.Payload()
+    payload: SagaReply
   ) {
-    Logger.log({ key, value }, 'payment.saga.reply');
+    Logger.log({ key, payload }, 'payment.saga.reply');
 
     if (key.status === 'CONTINUE') {
-      if (!value.success) {
+      if (!payload.success) {
         key.status = 'COMPENSATING';
         key.index--;
         await this.sendToInventory(key);
@@ -87,70 +92,59 @@ export class OrchestratorMessagingController {
       }
 
       key.status = 'COMPLETED';
-      await this.kafka.produce({
-        topic: 'saga.completed',
-        data: {
-          key,
-          value: this.orchestratorService.findSagaItem(key),
-        },
+      await this.producer.produce({
+        channel: 'saga.completed',
+        key,
+        payload: this.orchestratorService.findSagaItem(key),
       });
       return;
     }
-
     throw new Error('Invalid status');
   }
 
   private async sendToPayment(key: SagaKey) {
     const item = this.orchestratorService.findSagaItem(key);
-    await this.kafka.produce({
-      topic: 'payment.saga',
-      data: {
-        key,
-        value: new PaymentSagaMessage({
-          cardNumber: item.payload.cardNumber,
-          cardOwner: item.payload.cardOwner,
-          checksum: item.payload.checksum,
-          total: item.payload.total,
-        }),
-      },
+    await this.producer.produce({
+      channel: 'payment.saga',
+      key,
+      payload: new PaymentSagaMessage({
+        cardNumber: item.payload.cardNumber,
+        cardOwner: item.payload.cardOwner,
+        checksum: item.payload.checksum,
+        total: item.payload.total,
+      }),
     });
   }
 
   private async sendToInventory(key: SagaKey) {
     const item = this.orchestratorService.findSagaItem(key);
-    await this.kafka.produce({
-      topic: 'inventory.saga',
-      data: {
-        key,
-        value: new InventorySagaMessage({
-          sessionId: item.sessionId,
-        }),
-      },
+    await this.producer.produce({
+      channel: 'inventory.saga',
+      key,
+      payload: new InventorySagaMessage({
+        sessionId: item.sessionId,
+      }),
     });
   }
 
   private async sendToOrder(key: SagaKey) {
     const item = this.orchestratorService.findSagaItem(key);
-    await this.kafka.produce({
-      topic: 'order.saga',
-      data: {
-        key,
-        value: new OrderSagaMessage({
-          orderId: item.sessionId + '-' + key.id,
-        }),
-      },
+    await this.producer.produce({
+      channel: 'order.saga',
+      key,
+      payload: new OrderSagaMessage({
+        orderId: item.sessionId + '-' + key.id,
+      }),
     });
   }
 
   private async rejectSaga(key: SagaKey) {
     const item = this.orchestratorService.findSagaItem(key);
     key.status = 'REJECTED';
-    await this.kafka.produce({
-      topic: 'saga.rejected',
-      data: {
-        key,
-        value: item,
-      },
+    await this.producer.produce({
+      channel: 'saga.rejected',
+      key,
+      payload: item,
     });
 
     this.orchestratorService.repository.delete(item);

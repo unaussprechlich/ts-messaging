@@ -1,103 +1,67 @@
+import { Confluent } from '@ts-messaging/registry-confluent';
+import { Avro, AvroObject } from '@ts-messaging/schema-avro';
 import {
   Kafka,
+  KafkaChannel,
+  KafkaController,
   KafkaMessage,
-  KafkaMetadata,
-  KafkaTopic,
+  KafkaMessageMetadata,
 } from '@ts-messaging/client-kafka';
-import { Avro } from '@ts-messaging/schema-avro';
-import { Confluent } from '@ts-messaging/registry-confluent';
+
+//1. Initialization of the registry adapter and schema adapter
+const confluentSchemaRegistry = new Confluent({
+  clientConfig: {
+    baseUrl: 'http://localhost:8081',
+  },
+  schemaProviders: [new Avro()],
+  autoRegisterSchemas: true,
+});
+
+//2. Definition of a SchemaObject
 
 @Avro.Record({
   name: 'sampleRecord',
   namespace: 'com.mycorp.mynamespace',
   doc: 'Sample schema to help you get started.',
 })
-export class TestKey {
+export class SampleRecord implements AvroObject {
   @Avro.Int({
     doc: 'The int type is a 32-bit signed integer.',
   })
-  my_field1: number;
+  my_field1: number | undefined;
 
-  constructor(my_field1: number) {
+  //If the schema is used in a endpoint all constructor arguments must be optional.
+  constructor(my_field1?: number) {
     this.my_field1 = my_field1;
   }
 }
 
-/**
- * Avro: Value schema
- */
-@Avro.Record({
-  name: 'value',
-})
-export class TestValue {
-  @Avro.String()
-  value: string;
-
-  constructor(value: string) {
-    this.value = value;
-  }
-}
-
-@Kafka.Controller()
-class TestController {
-  //Inject the client into the controller
-  @Kafka.InjectClient()
-  kafka: Kafka;
-
-  //Define a message endpoint
-  @Kafka.Endpoint('test-topic')
+@Kafka.Controller({ consumer: { groupId: 'minimal-example' } })
+class MinimalController implements KafkaController {
+  @Kafka.Endpoint('minimal.example')
   async onMessage(
-    @Kafka.Key() key: TestKey,
-    @Kafka.Value() value: TestValue,
-    @Kafka.Metadata() meta: KafkaMetadata
+    @Kafka.Key() key: { id: string },
+    @Kafka.Payload() payload: SampleRecord,
+    @Kafka.Metadata() meta: KafkaMessageMetadata
   ) {
-    if (Math.random() > 0.5) {
-      throw new Error('Random error!');
-    }
     console.log('[MyEndpoint] Message offset=' + meta.offset);
-    await this.kafka.produce({
-      topic: 'test-topic.reply',
-      data: {
-        key: key,
-        value: { success: true },
-      },
-    });
-  }
-
-  //Intercept errors
-  @Kafka.OnError()
-  async onError(
-    topic: KafkaTopic,
-    message: KafkaMessage,
-    error: Error | unknown
-  ) {
-    console.log('[MyEndpoint] Error=' + error);
-
-    return true;
   }
 }
 
 const client = new Kafka({
   broker: { brokers: ['localhost:9092'] },
-  consumer: { groupId: 'test' },
-  autoRegisterTopics: true,
-  registry: new Confluent({
-    clientConfig: {
-      baseUrl: 'http://localhost:8081',
-    },
-    schemaProviders: [new Avro()],
-    autoRegisterSchemas: true,
-  }),
-  controllers: [TestController],
+  registry: confluentSchemaRegistry,
+  controllers: [MinimalController],
+  autoRegisterChannels: true,
 });
 
+const producer = client.broker.createProducer({});
+
 async function sendSomething() {
-  await client.produce({
-    topic: 'test-topic',
-    data: {
-      key: new TestKey(1),
-      value: new TestValue('Hello World!'),
-    },
+  await producer.produce({
+    channel: 'minimal.example',
+    payload: new SampleRecord(123),
+    key: { id: '::1' },
   });
 }
 

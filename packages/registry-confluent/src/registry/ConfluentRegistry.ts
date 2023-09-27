@@ -10,10 +10,10 @@ import {
   Schema,
   SchemaEntrypoint,
 } from '@ts-messaging/common';
-import { ConfluentSubject, ConfluentSubjectFactory } from '../subject';
 import { ConfluentError } from '../ConfluentError';
+import { ConfluentContract, ConfluentContractFactory } from '../contract';
 
-export class ConfluentRegistry extends AbstractRegistry<ConfluentSubject> {
+export class ConfluentRegistry extends AbstractRegistry<ConfluentContract> {
   protected logger: Logger = LoggerChild({
     package: 'registry-confluent',
     name: 'ConfluentRegistry',
@@ -23,7 +23,7 @@ export class ConfluentRegistry extends AbstractRegistry<ConfluentSubject> {
   readonly api: SchemaRegistryApi;
   autoRegisterSchemas: boolean;
 
-  protected readonly subjectFactory: ConfluentSubjectFactory;
+  protected readonly contractFactory: ConfluentContractFactory;
 
   protected constructor(config: {
     schemaProviders: SchemaEntrypoint[];
@@ -32,7 +32,7 @@ export class ConfluentRegistry extends AbstractRegistry<ConfluentSubject> {
   }) {
     super(config.schemaProviders);
     this.api = new SchemaRegistryApi(config.clientConfig);
-    this.subjectFactory = new ConfluentSubjectFactory(this);
+    this.contractFactory = new ConfluentContractFactory(this);
     this.autoRegisterSchemas = config.autoRegisterSchemas ?? false;
   }
 
@@ -73,43 +73,43 @@ export class ConfluentRegistry extends AbstractRegistry<ConfluentSubject> {
     }
   }
 
-  protected async loadSubject(
-    subjectName: string
-  ): Promise<ConfluentSubject | null> {
+  protected async loadContract(
+    contractName: string
+  ): Promise<ConfluentContract | null> {
     const request: SchemaRegistryClientInferRequest<
       typeof this.api.contract.subjects.get
     > = {
-      query: { subjectPrefix: subjectName },
+      query: { subjectPrefix: contractName },
     } as const;
 
     const response = await this.api.client.subjects.get(request);
 
     if (response.status === 200) {
       const has =
-        response.body.length > 0 && response.body.includes(subjectName);
+        response.body.length > 0 && response.body.includes(contractName);
 
       if (!has) {
         this.logger.info(
-          `The registry does not have subject with name="${subjectName}" in the registry. Creating (locally) ...`
+          `The registry does not have contract with name="${contractName}" in the registry. Creating (locally) ...`
         );
-        return this.subjectFactory.produce({
-          name: subjectName,
+        return this.contractFactory.produce({
+          name: contractName,
         });
       }
 
       this.logger.info(
-        `The registry has="${has}" the subject="${subjectName}" in the registry.`
+        `The registry has="${has}" the contract="${contractName}" in the registry.`
       );
 
-      return this.subjectFactory.produce({
-        name: subjectName,
+      return this.contractFactory.produce({
+        name: contractName,
       });
     } else if (response.status === 404) {
       this.logger.info(
-        `The registry does not have subjects with the prefix="${subjectName}" in the registry. Creating (locally) ...`
+        `The registry does not have contract with the prefix="${contractName}" in the registry. Creating (locally) ...`
       );
-      return this.subjectFactory.produce({
-        name: subjectName,
+      return this.contractFactory.produce({
+        name: contractName,
       });
     } else {
       throw this.logger.proxyError(

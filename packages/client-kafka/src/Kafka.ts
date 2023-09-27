@@ -1,4 +1,4 @@
-import { KafkaClient } from './client';
+import { KafkaBroker } from './broker';
 import {
   AdminConfig,
   ConsumerConfig,
@@ -6,7 +6,7 @@ import {
   ProducerConfig,
 } from 'kafkajs';
 import {
-  KafkaController,
+  KafkaInternalController,
   KafkaControllerDecoratorFactory,
   KafkaControllerFactory,
   KafkaEndpointDecoratorFactory,
@@ -15,50 +15,48 @@ import {
   KafkaEndpointParamMetadataDecoratorFactory,
   KafkaEndpointParamValueDecoratorFactory,
   KafkaInjectClientDecoratorFactory,
-  KafkaOnErrorDecoratorFactory,
+  KafkaController,
+  KafkaCreateProducerDecoratorFactory,
 } from './controller';
-import {
-  ClientEntrypoint,
-  Constructor,
-  RegistryEntrypoint,
-} from '@ts-messaging/common';
-import { KafkaTopic, KafkaTopicFactory } from './topic';
+import { Client, Constructor, RegistryEntrypoint } from '@ts-messaging/common';
 
-export class Kafka extends KafkaClient implements ClientEntrypoint {
+export class Kafka implements Client {
   static readonly TYPENAME = '@ts-messaging/client-kafka';
   static readonly INJECT_TOKEN: symbol = Symbol('@ts-messaging/client-kafka');
   readonly INJECT_TOKEN: symbol = Kafka.INJECT_TOKEN;
   readonly TYPENAME: string = Kafka.TYPENAME;
 
-  protected readonly controllerFactory: KafkaControllerFactory;
-  readonly registry: RegistryEntrypoint;
-  private readonly controllerConstructors: Constructor[];
-  private readonly controllers: KafkaController[] = [];
+  private readonly controllerConstructors: Constructor<KafkaController>[];
+  private readonly controllers: KafkaInternalController[] = [];
 
-  protected readonly topicFactory: KafkaTopicFactory;
+  protected readonly controllerFactory: KafkaControllerFactory;
+
+  readonly broker: KafkaBroker;
+  readonly registry: RegistryEntrypoint;
 
   constructor(config: {
     broker: KafkaConfig;
-    consumer: ConsumerConfig;
     producer?: ProducerConfig;
+    consumer?: ConsumerConfig;
     admin?: AdminConfig;
     registry: RegistryEntrypoint;
-    controllers: Constructor[];
-    autoRegisterTopics?: boolean;
+    controllers: Constructor<KafkaController>[];
+    autoRegisterChannels?: boolean;
   }) {
-    super(config);
-    this.controllerConstructors = config.controllers;
     this.registry = config.registry;
+    this.broker = new KafkaBroker(config.registry, {
+      broker: config.broker,
+      producer: config.producer,
+      consumer: config.consumer,
+      admin: config.admin,
+      autoRegisterChannels: config.autoRegisterChannels,
+    });
 
-    this.controllerFactory = new KafkaControllerFactory(this);
-    this.topicFactory = new KafkaTopicFactory(this, this.registry);
+    this.controllerConstructors = config.controllers;
+    this.controllerFactory = new KafkaControllerFactory(this.broker);
   }
 
-  async loadTopic(topicName: string): Promise<KafkaTopic> {
-    return this.topicFactory.produce({ name: topicName });
-  }
-
-  override async internalInit(): Promise<void> {
+  protected async internalInit(): Promise<void> {
     await this.registry.init();
 
     for (const controllerConstructor of this.controllerConstructors) {
@@ -68,17 +66,33 @@ export class Kafka extends KafkaClient implements ClientEntrypoint {
       this.controllers.push(controller);
     }
 
-    await super.internalInit();
-    await super.internalInit();
+    await this.broker.init();
+  }
+
+  protected initPromise: Promise<void> | undefined;
+  async init(): Promise<void> {
+    if (!this.initPromise) {
+      this.initPromise = this.internalInit();
+    }
+
+    return this.initPromise;
+  }
+
+  async connect(): Promise<void> {
+    await this.broker.connect();
+  }
+
+  async disconnect(): Promise<void> {
+    await this.broker.disconnect();
   }
 
   static readonly Controller = KafkaControllerDecoratorFactory;
   static readonly Endpoint = KafkaEndpointDecoratorFactory;
   static readonly InjectClient = KafkaInjectClientDecoratorFactory;
-  static readonly OnError = KafkaOnErrorDecoratorFactory;
+  static readonly Producer = KafkaCreateProducerDecoratorFactory;
 
   static readonly Key = KafkaEndpointParamKeyDecoratorFactory;
-  static readonly Value = KafkaEndpointParamValueDecoratorFactory;
+  static readonly Payload = KafkaEndpointParamValueDecoratorFactory;
   static readonly Headers = KafkaEndpointParamHeadersDecoratorFactory;
   static readonly Metadata = KafkaEndpointParamMetadataDecoratorFactory;
 }

@@ -10,7 +10,6 @@ The documentation can be found [here](https://unaussprechlich.github.io/ts-messa
 ## Minimal Example
 Create a connection with the Confluent Schema Registry and Avro as a schema provider.
 ```typescript
-import { Avro } from '@ts-messaging/schema-avro';
 import { Confluent } from '@ts-messaging/registry-confluent';
 
 const confluentSchemaRegistry = new Confluent({
@@ -24,6 +23,8 @@ const confluentSchemaRegistry = new Confluent({
 
 Create a Avro Schema with decorators.
 ```typescript
+import { Avro } from '@ts-messaging/schema-avro';
+
 @Avro.Record({
     name: 'sampleRecord',
     namespace: 'com.mycorp.mynamespace',
@@ -40,7 +41,6 @@ export class TestValue {
         this.my_field1 = my_field1;
     }
 }
-
 ```
 
 Setup a Kafka Client and import the `TestController`

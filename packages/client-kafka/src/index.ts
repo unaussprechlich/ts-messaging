@@ -1,7 +1,6 @@
 export * from './KafkaMessage';
-export * from './topic';
 
 export * from './controller';
-export * from './client';
+export * from './broker';
 export * from './Kafka';
-export * from './topic';
+export * from './channel';

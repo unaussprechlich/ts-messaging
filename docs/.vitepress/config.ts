@@ -38,8 +38,8 @@ export default defineConfig({
         base: '/architecture/',
         items: [
           { text: 'Schema', link: 'schema' },
-          { text: 'Subject', link: 'subject' },
-          { text: 'Topic', link: 'topic' },
+          { text: 'Contract', link: 'contract' },
+          { text: 'Channel', link: 'channel' },
           { text: 'Registry', link: 'registry' },
           { text: 'Controller', link: 'controller' },
           { text: 'Endpoint', link: 'endpoint' },

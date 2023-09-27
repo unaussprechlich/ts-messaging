@@ -1,2 +1,2 @@
 export * from './DiffResult';
-export * from './Contract';
+export * from './ContractVersion';

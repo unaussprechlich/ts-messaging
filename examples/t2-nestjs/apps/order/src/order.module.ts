@@ -11,8 +11,7 @@ import { OrderMessagingController } from './order.messaging.controller';
 export class OrderModule implements OnModuleInit, OnModuleDestroy {
   protected readonly client = new Kafka({
     broker: { brokers: ['localhost:9092'] },
-    consumer: { groupId: 'order' },
-    autoRegisterTopics: true,
+    autoRegisterChannels: true,
     registry: new Confluent({
       autoRegisterSchemas: true,
       clientConfig: {

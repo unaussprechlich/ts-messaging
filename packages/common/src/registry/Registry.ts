@@ -1,5 +1,5 @@
 import { Initable } from '../interfaces';
-import { Subject } from './subject';
+import { Contract } from './Contract';
 import { Schema, SchemaObject } from '../schema';
 import { UID } from '../utils';
 
@@ -11,6 +11,6 @@ export interface Registry extends Initable, UID {
     schemaId: number
   ): Promise<Schema<T>>;
 
-  findSubject(subjectName: string): Promise<Subject | null>;
-  findSubjectWithError(subjectName: string): Promise<Subject>;
+  findContract(subjectName: string): Promise<Contract | null>;
+  findContractWithError(subjectName: string): Promise<Contract>;
 }

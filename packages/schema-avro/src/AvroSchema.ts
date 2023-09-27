@@ -48,10 +48,6 @@ export class AvroSchema<
     return this.zodType.safeParse(data);
   }
 
-  toString(): string {
-    return JSON.stringify(this.rawSchema);
-  }
-
   protected genZodType(rawSchema: RawSchema): ZodType<T> {
     return AvroSchema.zodTypeFactory.produce<T>(rawSchema as AvroRawSchema);
   }

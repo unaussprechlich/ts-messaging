@@ -1,4 +1,4 @@
-import { BaseClass, Consumer, Controller, Topic } from '@ts-messaging/common';
+import { BaseClass, Consumer, Controller, Channel } from '@ts-messaging/common';
 
 export abstract class AbstractConsumer extends BaseClass implements Consumer {
   protected readonly controllers: Controller[] = [];
@@ -18,7 +18,7 @@ export abstract class AbstractConsumer extends BaseClass implements Consumer {
     return this.initPromise;
   }
 
-  abstract subscribe(topics: Topic[]): Promise<void>;
+  abstract subscribe(channels: Channel[]): Promise<void>;
   abstract connect(): Promise<void>;
   abstract disconnect(): Promise<void>;
 }

@@ -1,2 +1,2 @@
 export * from './AbstractRegistry';
-export * from './subject';
+export * from './contract';

@@ -1,4 +1,4 @@
-export * from './KafkaController';
+export * from './KafkaInternalController';
 export * from './KafkaControllerFactory';
 
 export * from './decorators';

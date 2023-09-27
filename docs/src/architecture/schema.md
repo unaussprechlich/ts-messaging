@@ -27,7 +27,7 @@ export interface SchemaObject {
 ### `Schema`
 The schema is the common interface between all packages and the minimum type available to the developer.
 
-Each Schema has a unique ID the `__id`, a type `__type` and the raw schema `rawSchema`. The Schema is used to `encode` and `decode` messages and `validate` the message data. The `findVersion` method can be used to find the version of a schema in a registry.
+Each Schema has a unique ID the `__id`, a type `__type` and the raw schema `rawSchema`. The Schema is used to `encode` and `decode` messages and `validate` the message data.
 ```ts
 export interface Schema<T extends SchemaObject = SchemaObject> {
   readonly __type: string;
@@ -38,8 +38,6 @@ export interface Schema<T extends SchemaObject = SchemaObject> {
   decode(buffer: Buffer): T | null;
   encode(data: T): Buffer;
   validate(data: T): { success: boolean };
-  
-  findVersion(subject: string): Promise<string | null>;
 }
 ```
 
@@ -53,8 +51,7 @@ export interface SchemaFactory<SchemaType extends string = string> {
     config: {
       __id: number;
       rawSchema: RawSchema<SchemaType>;
-    },
-    registry: Registry
+    }
   ): Schema<T>;
 }
 ```
@@ -63,7 +60,7 @@ export interface SchemaFactory<SchemaType extends string = string> {
 The `SchemaEntrypoint` provides the a `Constructor<SchemaFactory>` to the `Registry` this constructor is invokes by the `Registry` to create a reusable `SchemaFactory` for the schema type.
 ```ts
 export interface SchemaEntrypoint extends Entrypoint {
-  readonly SchemaFactoryConstructor: Constructor<SchemaFactory>;
+    readonly schemaFactory: SchemaFactory;
 }
 ```
 
@@ -75,18 +72,14 @@ The AbstractSchema is the base class for all schema implementations. It implemen
 ```ts
 import { Schema, SchemaObject, Registry } from "@ts-messaging/common";
 
-export class AbstractSchema<T extends SchemaObject = SchemaObject> implements Schema<T> {
-  // ... interface Schema
-  readonly registry: Registry;
-  readonly versions: Map<string, string> = new Map();
-  
-  constructor(registry: Registry) {
-    this.registry = registry;
-  }
-  
-  async findVersion(subject: string): Promise<string | null> {
-    // ... implementation
-  }
+export abstract class AbstractSchema<T extends SchemaObject = SchemaObject> implements Schema<T> {
+    abstract readonly __id: number;
+    abstract readonly __type: string;
+    abstract readonly rawSchema: RawSchema;
+
+    abstract decode(buffer: Buffer): T;
+    abstract encode(data: T): Buffer;
+    abstract validate(data: T): { success: boolean };
 }
 ```
 

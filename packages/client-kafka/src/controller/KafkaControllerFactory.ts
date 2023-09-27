@@ -1,15 +1,18 @@
-import { KafkaConsumer } from '../client';
-import { KafkaController, KafkaMessageEndpoint } from './KafkaController';
+import {
+  KafkaController,
+  KafkaInternalController,
+  KafkaMessageEndpoint,
+} from './KafkaInternalController';
 import { Constructor, LoggerChild, Logger } from '@ts-messaging/common';
 import { AbstractControllerFactory } from '@ts-messaging/client';
 import {
   KafkaControllerReflections,
+  KafkaCreateProducerReflections,
   KafkaEndpointReflections,
   KafkaEndpointReflectionType,
   KafkaInjectClientReflections,
-  KafkaOnErrorReflections,
 } from './decorators';
-import { Kafka } from '../Kafka';
+import { KafkaBroker, KafkaConsumer } from '../broker';
 
 export class KafkaControllerFactory extends AbstractControllerFactory {
   protected readonly logger: Logger = LoggerChild({
@@ -18,11 +21,13 @@ export class KafkaControllerFactory extends AbstractControllerFactory {
     uuid: this.__uid,
   });
 
-  constructor(protected readonly kafka: Kafka) {
+  constructor(protected readonly kafka: KafkaBroker) {
     super();
   }
 
-  async produce(target: Constructor): Promise<KafkaController> {
+  async produce(
+    target: Constructor<KafkaController>
+  ): Promise<KafkaInternalController> {
     const controllerName = target.name;
 
     const targetInstance = new target();
@@ -36,25 +41,7 @@ export class KafkaControllerFactory extends AbstractControllerFactory {
       consumer
     );
 
-    return new KafkaController(
-      target.name,
-      consumer,
-      endpoints,
-      this.extractErrorHandler(targetInstance)
-    );
-  }
-
-  private extractErrorHandler(targetInstance: any) {
-    const useReflect = KafkaOnErrorReflections.useReflect(
-      targetInstance.constructor
-    );
-
-    if (useReflect?.handler) {
-      const handler = targetInstance[useReflect.handler];
-      return handler.bind(targetInstance);
-    } else {
-      return null;
-    }
+    return new KafkaInternalController(target.name, consumer, endpoints);
   }
 
   private injectResources(targetInstance: any) {
@@ -65,13 +52,24 @@ export class KafkaControllerFactory extends AbstractControllerFactory {
     if (maybeInjectClient?.injectClientKey) {
       targetInstance[maybeInjectClient.injectClientKey] = this.kafka;
     }
+
+    const createProducers =
+      KafkaCreateProducerReflections.useSafeReflectWithDefault(
+        targetInstance.constructor
+      );
+
+    for (const createProducer of createProducers) {
+      targetInstance[createProducer.key] = this.kafka.createProducer(
+        createProducer.config
+      );
+    }
   }
 
   private getConsumer(target: Constructor) {
     const reflect = KafkaControllerReflections.useSafeReflectWithError(target);
     return reflect.consumerConfig
       ? this.kafka.createConsumer(reflect.consumerConfig)
-      : this.kafka.consumer;
+      : this.kafka.defaultConsumer;
   }
 
   private async processEndpoints(
@@ -112,46 +110,49 @@ export class KafkaControllerFactory extends AbstractControllerFactory {
     endpointFn: (...args: any) => Promise<void>,
     consumer: KafkaConsumer
   ) {
-    const topicName = reflectedEndpoint.topicName;
+    const channel = await this.kafka.findChannelWithError(
+      reflectedEndpoint.channelName
+    );
+    const contract = await channel.findContract();
+    const keyContract = await channel.findKeyContract();
 
     const endpoint: KafkaMessageEndpoint = {
-      topicName: reflectedEndpoint.topicName,
+      channel: channel,
       name: endpointFn.name,
       params: Object.values(reflectedEndpoint.params),
-      schema: {
-        key: [],
-        value: [],
-      },
+      payloadContractVersion: null,
+      keyContractVersion: null,
       designTypes: {},
       endpoint: endpointFn,
     };
 
-    const topic = await this.kafka.findTopicWithError(topicName);
-    await consumer.subscribe([topic]);
+    await consumer.subscribe([channel]);
 
-    if (reflectedEndpoint.params.value?.designType) {
-      const schema =
-        await topic.valueSubject.findSchemaBySchemaObjectConstructor(
+    if (contract && reflectedEndpoint.params.value?.designType) {
+      const contractVersion =
+        await contract.findSchemaBySchemaObjectConstructor(
           reflectedEndpoint.params.value.designType,
           {
             autoRegister: reflectedEndpoint.params.value.config?.autoRegister,
           }
         );
-      if (schema) {
-        endpoint.schema.value.push(schema.schema.__id);
-        endpoint.designTypes.value = reflectedEndpoint.params.value.designType;
+      if (contractVersion) {
+        endpoint.payloadContractVersion = contractVersion;
+        endpoint.designTypes.payload =
+          reflectedEndpoint.params.value.designType;
       }
     }
 
-    if (reflectedEndpoint.params.key?.designType) {
-      const schema = await topic.keySubject.findSchemaBySchemaObjectConstructor(
-        reflectedEndpoint.params.key.designType,
-        {
-          autoRegister: reflectedEndpoint.params.key.config?.autoRegister,
-        }
-      );
-      if (schema) {
-        endpoint.schema.key.push(schema.schema.__id);
+    if (keyContract && reflectedEndpoint.params.key?.designType) {
+      const contractVersion =
+        await keyContract.findSchemaBySchemaObjectConstructor(
+          reflectedEndpoint.params.key.designType,
+          {
+            autoRegister: reflectedEndpoint.params.key.config?.autoRegister,
+          }
+        );
+      if (contractVersion) {
+        endpoint.keyContractVersion = contractVersion;
         endpoint.designTypes.key = reflectedEndpoint.params.key.designType;
       }
     }

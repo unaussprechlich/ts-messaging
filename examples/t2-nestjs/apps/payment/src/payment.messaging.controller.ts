@@ -1,48 +1,47 @@
 import { Logger } from '@nestjs/common';
-import { Kafka } from '@ts-messaging/client-kafka';
+import { Kafka, KafkaProducer } from '@ts-messaging/client-kafka';
 import { SagaKey } from 'lib/saga/schemas/SagaKey';
 import { PaymentService } from './payment.service';
 import { PaymentSagaMessage } from './schemas/PaymentSagaMessage';
 import { SagaReply } from 'lib/saga';
 
-@Kafka.Controller()
+@Kafka.Controller({ consumer: { groupId: 'payment' } })
 export class PaymentMessagingController {
   @Kafka.InjectClient()
   readonly client: Kafka;
+
+  @Kafka.Producer()
+  readonly producer: KafkaProducer;
 
   protected readonly paymentService = new PaymentService();
 
   @Kafka.Endpoint('payment.saga')
   async onSaga(
     @Kafka.Key() key: SagaKey,
-    @Kafka.Value() value: PaymentSagaMessage
+    @Kafka.Payload() payload: PaymentSagaMessage
   ) {
-    Logger.log({ key, value }, 'payment.saga');
+    Logger.log({ key, payload }, 'payment.saga');
 
     try {
-      await this.client.produce({
-        topic: 'order.saga.reply',
-        data: {
-          key: key,
-          value: new SagaReply({
-            success: this.paymentService.processPayment({
-              amount: value.total,
-              cardNumber: value.cardNumber,
-              cardOwner: value.cardOwner,
-              checksum: value.checksum,
-            }),
+      await this.producer.produce({
+        channel: 'order.saga.reply',
+        key: key,
+        payload: new SagaReply({
+          success: this.paymentService.processPayment({
+            amount: payload.total,
+            cardNumber: payload.cardNumber,
+            cardOwner: payload.cardOwner,
+            checksum: payload.checksum,
           }),
-        },
+        }),
       });
     } catch (e) {
-      await this.client.produce({
-        topic: 'order.saga.reply',
-        data: {
-          key: key,
-          value: new SagaReply({
-            success: false,
-          }),
-        },
+      await this.producer.produce({
+        channel: 'order.saga.reply',
+        key: key,
+        payload: new SagaReply({
+          success: false,
+        }),
       });
     }
   }

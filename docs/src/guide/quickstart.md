@@ -92,7 +92,7 @@ The framework will automatically register the endpoint with the consumer defined
 class UserController {
 
     @Kafka.Endpoint("user.create")
-    async createUser(@Kafka.Value() user: User) {
+    async createUser(@Kafka.Payload() user: User) {
         // ...
     }
 
@@ -101,7 +101,7 @@ class UserController {
 
 ## Create a Registry
 
-The registry is the single source of truth inside the Framework and is responsible for registering and retrieving schemas. The registry supports multiple schema providers, so you can use different schemas for the same topic.
+The registry is the single source of truth inside the Framework and is responsible for registering and retrieving schemas. The registry supports multiple schema providers, so you can use different schemas for the same channel.
 
 ```ts
 const registry = new Confluent({
@@ -140,18 +140,19 @@ const client = new Kafka({
 
 
 ### Initialize and start the Application
-The client is initialized asynchronously and can be started with the `init()` method. The `init()` method will create the Kafka consumer and producer, register the controllers, subscribe to the topics, and start the application. The `init()` method will return a promise that will resolve once the application is ready.
+The client is initialized asynchronously and can be started with the `init()` method. The `init()` method will create the Kafka consumer and producer, register the controllers, subscribe to the channels, and start the application. The `init()` method will return a promise that will resolve once the application is ready.
 ```ts
 await client.init();
+await client.connect();
 ```
 
 ### Send a Message
-The client exposes a `produce()` method that can be used to send messages to a topic. The `produce()` method will automatically serialize the message value and key if a schema has been provided. The `send()` method will return a promise that will resolve once the message has been sent.
+The client exposes a `produce()` method that can be used to send messages to a channel. The `produce()` method will automatically serialize the message value and key if a schema has been provided. The `send()` method will return a promise that will resolve once the message has been sent.
 
 ```ts
-await client.produce({
-  topic: 'user.create',
-  value: new User({
+await client.broker.defaultProducer.produce({
+  channel: 'user.create',
+  payload: new User({
     name: 'John Doe',
     age: 42,
   }),

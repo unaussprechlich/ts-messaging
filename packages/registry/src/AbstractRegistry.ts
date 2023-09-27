@@ -1,7 +1,7 @@
 import {
   Registry,
   Schema,
-  Subject,
+  Contract,
   SchemaObject,
   BaseClass,
   SchemaFactoryRegistry,
@@ -9,7 +9,7 @@ import {
   Cache,
 } from '@ts-messaging/common';
 
-export abstract class AbstractRegistry<TSubject extends Subject>
+export abstract class AbstractRegistry<TContract extends Contract>
   extends BaseClass
   implements Registry
 {
@@ -21,28 +21,28 @@ export abstract class AbstractRegistry<TSubject extends Subject>
   }
 
   /**
-   * Subject Cache
+   * Contract Cache
    * @protected
    */
-  protected readonly subjectCache = new Cache<string, TSubject>((key: string) =>
-    this.loadSubject(key)
+  protected readonly contractCache = new Cache<string, TContract>(
+    (key: string) => this.loadContract(key)
   );
-  protected abstract loadSubject(subjectName: string): Promise<TSubject | null>;
+  protected abstract loadContract(name: string): Promise<TContract | null>;
 
-  async findSubject(subjectName: string): Promise<TSubject | null> {
-    return this.subjectCache.find(subjectName);
+  async findContract(contractName: string): Promise<TContract | null> {
+    return this.contractCache.find(contractName);
   }
 
-  async findSubjectWithError(subjectName: string): Promise<TSubject> {
-    const subject = await this.findSubject(subjectName);
+  async findContractWithError(contractName: string): Promise<TContract> {
+    const contract = await this.findContract(contractName);
 
-    if (!subject) {
+    if (!contract) {
       throw this.logger.proxyError(
-        new Error(`Subject with name ${subjectName} not found.`)
+        new Error(`Contract with name ${contractName} not found.`)
       );
     }
 
-    return subject;
+    return contract;
   }
 
   /**

@@ -4,7 +4,7 @@ import {
   LoggerChild,
   MagicByteSerializer,
   Schema,
-  Contract,
+  ContractVersion,
   SchemaObject,
 } from '@ts-messaging/common';
 
@@ -23,7 +23,7 @@ export abstract class Serializer extends BaseClass {
    */
   encode<T extends SchemaObject>(
     schemaObject: T,
-    schemaAndVersion?: Contract<T> | null
+    schemaAndVersion?: ContractVersion<T> | null
   ): Buffer {
     const schema = schemaAndVersion?.schema;
 

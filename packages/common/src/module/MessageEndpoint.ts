@@ -1,7 +1,9 @@
-import { Message } from '../client';
+import { Channel } from '../client';
+import { ContractVersion } from '../types';
 
-export interface MessageEndpoint<M extends Message = Message> {
-  topicName: string;
-  schema: Record<string, number[]> | number[];
-  endpoint: (message: M) => Promise<void>;
+export interface MessageEndpoint {
+  name: string;
+  channel: Channel;
+  payloadContractVersion: ContractVersion | null;
+  endpoint: (...args: any[]) => Promise<void>;
 }

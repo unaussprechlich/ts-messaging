@@ -11,7 +11,7 @@ export class SchemaFactoryRegistry {
 
   constructor(schemaProviders: SchemaEntrypoint[]) {
     for (const schemaProvider of schemaProviders) {
-      this.registerSchemaFactory(new schemaProvider.SchemaFactoryConstructor());
+      this.registerSchemaFactory(schemaProvider.schemaFactory);
     }
   }
 

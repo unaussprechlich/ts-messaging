@@ -1,1 +1,1 @@
-# Inject: ConfluentSubject
+# Inject: ConfluentContract
