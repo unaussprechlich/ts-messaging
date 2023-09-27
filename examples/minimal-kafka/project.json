@@ -1,0 +1,39 @@
+{
+  "name": "@examples/minimal-kafka",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/client/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/examples/minimal-kafka",
+        "main": "examples/minimal-kafka/src/index.ts",
+        "tsConfig": "examples/minimal-kafka/tsconfig.lib.json",
+        "assets": ["examples/minimal-kafka/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "examples/minimal-kafka/**/*.ts",
+          "examples/minimal-kafka/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/examples/minimal-kafka"],
+      "options": {
+        "coverage": true,
+        "config" : "examples/minimal-kafka/vite.config.ts",
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/examples/minimal-kafka"
+      }
+    }
+  },
+  "tags": []
+}

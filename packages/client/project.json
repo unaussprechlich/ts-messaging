@@ -1,0 +1,44 @@
+{
+  "name": "@ts-messaging/client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/client/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/client/dist",
+        "main": "packages/client/src/index.ts",
+        "tsConfig": "packages/client/tsconfig.lib.json",
+        "assets": ["packages/client/*.md"],
+        "generateExportsField" : true
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs @ts-messaging/client {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/client/**/*.ts",
+          "packages/client/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/client"],
+      "options": {
+        "coverage": true,
+        "config" : "packages/client/vite.config.ts",
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/client"
+      }
+    }
+  },
+  "tags": []
+}
