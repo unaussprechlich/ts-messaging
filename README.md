@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/686961126.svg)](https://zenodo.org/badge/latestdoi/686961126)
 <p align="center"><img alt="Logo" width="200px" height="200px" src="https://raw.githubusercontent.com/unaussprechlich/ts-messaging/dev/docs/src/public/logo.png"></p>
 
 
