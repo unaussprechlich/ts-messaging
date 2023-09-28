@@ -24,7 +24,7 @@ export class PaymentMessagingController {
 
     try {
       await this.producer.produce({
-        channel: 'order.saga.reply',
+        channel: 'payment.saga.reply',
         key: key,
         payload: new SagaReply({
           success: this.paymentService.processPayment({
@@ -36,8 +36,9 @@ export class PaymentMessagingController {
         }),
       });
     } catch (e) {
+      Logger.error(e);
       await this.producer.produce({
-        channel: 'order.saga.reply',
+        channel: 'payment.saga.reply',
         key: key,
         payload: new SagaReply({
           success: false,

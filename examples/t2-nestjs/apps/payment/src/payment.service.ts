@@ -8,13 +8,13 @@ export class PaymentService {
     checksum: string;
     amount: number;
   }): boolean {
-    Logger.log('processPayment', paymentData);
+    Logger.log('processing...');
 
     // Simulate random failure
     if (Math.random() < 0.1) {
       throw new Error('Random Failure');
     }
 
-    return Math.random() > 0.5;
+    return true;
   }
 }

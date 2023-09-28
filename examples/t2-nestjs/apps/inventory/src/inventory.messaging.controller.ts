@@ -37,6 +37,7 @@ export class InventoryMessagingController {
         payload: new SagaReply({ success: true }),
       });
     } catch (e) {
+      Logger.error(e);
       await this.producer.produce({
         channel: 'inventory.saga.reply',
         key: key,

@@ -11,6 +11,6 @@ export interface Registry extends Initable, UID {
     schemaId: number
   ): Promise<Schema<T>>;
 
-  findContract(subjectName: string): Promise<Contract | null>;
-  findContractWithError(subjectName: string): Promise<Contract>;
+  findContract(contractName: string): Promise<Contract | null>;
+  findContractWithError(contractName: string): Promise<Contract>;
 }

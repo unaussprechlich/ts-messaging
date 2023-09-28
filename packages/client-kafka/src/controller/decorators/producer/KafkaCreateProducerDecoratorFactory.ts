@@ -20,7 +20,7 @@ export function KafkaCreateProducerDecoratorFactory(config?: ProducerConfig) {
 
     reflection.push({
       key: propertyKey.toString(),
-      config: config ?? {},
+      config: config ?? null,
     });
   };
 }

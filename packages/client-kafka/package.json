@@ -1,6 +1,6 @@
 {
   "name": "@ts-messaging/client-kafka",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "dependencies": {
     "kafkajs": "^2.2.4",
     "@ts-messaging/client": "workspace:*",

@@ -39,6 +39,7 @@ export class OrderMessagingController {
         }),
       });
     } catch (e) {
+      Logger.error(e);
       await this.producer.produce({
         channel: 'order.saga.reply',
         key: key,

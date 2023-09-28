@@ -3,7 +3,7 @@ The Schema is defined in TypeScript using the decorators. The decorator will att
 
 ## Internal Schema Architecture
 
-Internally the schema os represented by `RawSchema`, `Schema`, `AbstractSchema`, and their schema-specific implementations.
+Internally the schema is represented by `RawSchema`, `Schema`, `AbstractSchema`, and their schema-specific implementations.
 
 ## :package: `@ts-messaging/common`
 

@@ -27,10 +27,10 @@ export class OrchestratorMessagingController {
     payload: SagaReply
   ) {
     Logger.log({ key, payload }, 'order.saga.reply');
+    key.index++;
 
     if (payload.success && key.status === 'CONTINUE') {
-      key.index++;
-      await this.sendToInventory(key);
+      await this.sendToPayment(key);
       return;
     } else {
       await this.rejectSaga(key);
@@ -46,17 +46,22 @@ export class OrchestratorMessagingController {
     payload: SagaReply
   ) {
     Logger.log({ key, payload }, 'inventory.saga.reply');
+    key.index++;
 
     if (key.status === 'CONTINUE') {
       if (!payload.success) {
         key.status = 'COMPENSATING';
-        key.index--;
         await this.sendToOrder(key);
         return;
       }
 
-      key.index++;
-      await this.sendToPayment(key);
+      key.status = 'COMPLETED';
+      await this.producer.produce({
+        channel: 'saga.completed',
+        key,
+        payload: this.orchestratorService.findSagaItem(key),
+      });
+      Logger.log('saga.completed', { key });
       return;
     }
 
@@ -66,8 +71,7 @@ export class OrchestratorMessagingController {
         return;
       }
 
-      key.index--;
-      await this.sendToPayment(key);
+      await this.sendToOrder(key);
       return;
     }
 
@@ -82,21 +86,16 @@ export class OrchestratorMessagingController {
     payload: SagaReply
   ) {
     Logger.log({ key, payload }, 'payment.saga.reply');
+    key.index++;
 
     if (key.status === 'CONTINUE') {
       if (!payload.success) {
         key.status = 'COMPENSATING';
-        key.index--;
         await this.sendToInventory(key);
         return;
       }
 
-      key.status = 'COMPLETED';
-      await this.producer.produce({
-        channel: 'saga.completed',
-        key,
-        payload: this.orchestratorService.findSagaItem(key),
-      });
+      await this.sendToInventory(key);
       return;
     }
     throw new Error('Invalid status');

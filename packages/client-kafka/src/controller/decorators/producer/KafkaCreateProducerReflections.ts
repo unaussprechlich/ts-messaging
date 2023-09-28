@@ -4,6 +4,6 @@ import { ReflectionHelper } from '@ts-messaging/common';
 export const KafkaCreateProducerReflections = new ReflectionHelper<
   {
     key: string;
-    config: ProducerConfig;
+    config: ProducerConfig | null;
   }[]
 >('@ts-messaging/client-kafka::CreateProducer', () => []);

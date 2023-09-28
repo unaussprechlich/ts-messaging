@@ -59,9 +59,13 @@ export class KafkaControllerFactory extends AbstractControllerFactory {
       );
 
     for (const createProducer of createProducers) {
-      targetInstance[createProducer.key] = this.kafka.createProducer(
-        createProducer.config
-      );
+      if (createProducer.config) {
+        targetInstance[createProducer.key] = this.kafka.createProducer(
+          createProducer.config
+        );
+      } else {
+        targetInstance[createProducer.key] = this.kafka.defaultProducer;
+      }
     }
   }
 

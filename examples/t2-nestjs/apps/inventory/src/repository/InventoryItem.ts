@@ -48,7 +48,7 @@ export class InventoryItem extends Item {
 
   deleteReservation(sessionID: string) {
     for (const [index, reservation] of this.reservations.entries()) {
-      if (reservation.userID === sessionID) {
+      if (reservation?.userID && reservation.userID === sessionID) {
         delete this.reservations[index];
         return;
       }

@@ -1,7 +1,7 @@
 <p align="center"><img alt="Logo" width="200px" height="200px" src="https://raw.githubusercontent.com/unaussprechlich/ts-messaging/dev/docs/src/public/logo.png"></p>
 
 
-# ts-messaging
+# ts-messaging (Status: Research Prototype)
 
 An opinionated framework for type consistency in message stacks with a focus on developer experience.
 

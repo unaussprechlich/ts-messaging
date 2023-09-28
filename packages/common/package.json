@@ -1,6 +1,6 @@
 {
   "name": "@ts-messaging/common",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "dependencies": {
     "pino": "^8.15.0",
     "pino-pretty": "^10.2.0",

@@ -1,5 +1,17 @@
 # @ts-messaging/registry-confluent
 
+## 1.0.0
+
+### Major Changes
+
+- Initial Research Prototype Release
+
+### Patch Changes
+
+- Updated dependencies
+  - @ts-messaging/common@1.0.0
+  - @ts-messaging/registry@1.0.0
+
 ## 0.0.0
 
 ### Patch Changes

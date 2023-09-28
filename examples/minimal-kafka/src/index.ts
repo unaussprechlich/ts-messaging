@@ -2,10 +2,9 @@ import { Confluent } from '@ts-messaging/registry-confluent';
 import { Avro, AvroObject } from '@ts-messaging/schema-avro';
 import {
   Kafka,
-  KafkaChannel,
   KafkaController,
-  KafkaMessage,
   KafkaMessageMetadata,
+  KafkaProducer,
 } from '@ts-messaging/client-kafka';
 
 //1. Initialization of the registry adapter and schema adapter
@@ -36,11 +35,15 @@ export class SampleRecord implements AvroObject {
   }
 }
 
-@Kafka.Controller({ consumer: { groupId: 'minimal-example' } })
+//3. Definition of a KafkaController
+@Kafka.Controller()
 class MinimalController implements KafkaController {
+  @Kafka.Producer()
+  readonly producer: KafkaProducer;
+
   @Kafka.Endpoint('minimal.example')
   async onMessage(
-    @Kafka.Key() key: { id: string },
+    @Kafka.Key() key: string,
     @Kafka.Payload() payload: SampleRecord,
     @Kafka.Metadata() meta: KafkaMessageMetadata
   ) {
@@ -48,6 +51,7 @@ class MinimalController implements KafkaController {
   }
 }
 
+//4. Definition of a KafkaClient
 const client = new Kafka({
   broker: { brokers: ['localhost:9092'] },
   registry: confluentSchemaRegistry,
@@ -55,13 +59,11 @@ const client = new Kafka({
   autoRegisterChannels: true,
 });
 
-const producer = client.broker.createProducer({});
-
 async function sendSomething() {
-  await producer.produce({
+  await client.broker.defaultProducer.produce({
     channel: 'minimal.example',
     payload: new SampleRecord(123),
-    key: { id: '::1' },
+    key: '::1',
   });
 }
 

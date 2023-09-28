@@ -36,7 +36,7 @@ export class InventoryService {
 
     const reservations = this.reservationRepository.findAll();
     for (const reservation of reservations) {
-      if (reservation.userID === sessionID) {
+      if (reservation?.userID && reservation.userID === sessionID) {
         this.reservationRepository.delete(reservation);
       }
     }

@@ -3,19 +3,19 @@ Contracts are the key resource of the [Registry](/architecture/registry) and are
 
 ## Internal Contract Architecture
 
-Internally, the channel is defined by `Contract`, `AbstractContract`, and their registry-specific implementations.
+Internally, the contract is defined by `Contract`, `AbstractContract`, and their registry-specific implementations.
 
 ## :package: `@ts-messaging/common`
 
-### `Contract<T>`
-Inside a `Contract` each registered `Schema` will be assigned a unique version. The `Contract` is the combination of the `Schema` and the `Contract`.
+### `ContractVersion<T>`
+Inside a `ContractVersion` each registered `Schema` will be assigned a unique version. The `ContractVersion` is the combination of the `Schema` and the `Contract`.
 
 ```ts 
-export interface ContractVersion<T extends SchemaObject = SchemaObject>{
-  version: number;
-  schema: Schema<T>;
-  channel: string
-};
+export interface ContractVersion<T extends SchemaObject = SchemaObject> {
+    contract: Contract;
+    version: number;
+    schema: Schema<T>;
+}
 ```
 
 ### `Contract`

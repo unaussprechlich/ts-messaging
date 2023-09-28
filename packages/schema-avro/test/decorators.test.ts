@@ -20,12 +20,10 @@ class TestRecord {
 
 const avro = new Avro();
 
-const schemaFactory = new avro.SchemaFactoryConstructor();
-
 function SchemaOf<T extends AvroObject>(target: { new (): T }) {
   const rawSchema = SchemaReflectionHelper.useSafeReflectWithError(target);
 
-  return schemaFactory.produce<T>({
+  return avro.schemaFactory.produce<T>({
     __id: 1,
     rawSchema: rawSchema as any,
   });
